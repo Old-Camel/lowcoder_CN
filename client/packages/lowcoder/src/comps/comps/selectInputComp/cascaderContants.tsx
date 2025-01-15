@@ -6,7 +6,7 @@ import { arrayObjectExposingStateControl, arrayStringExposingStateControl, jsonE
 import { BoolControl } from "comps/controls/boolControl";
 import { LabelControl } from "comps/controls/labelControl";
 import { styleControl } from "comps/controls/styleControl";
-import { CascaderStyle } from "comps/controls/styleControlConstants";
+import { AnimationStyle, CascaderStyle, ChildrenMultiSelectStyle, InputFieldStyle, LabelStyle } from "comps/controls/styleControlConstants";
 import {
   allowClearPropertyView,
   disabledPropertyView,
@@ -16,10 +16,10 @@ import {
 } from "comps/utils/propertyUtils";
 import { i18nObjs, trans } from "i18n";
 import { RefControl } from "comps/controls/refControl";
-import { CascaderRef } from "antd/lib/cascader";
+import { CascaderRef } from "antd/es/cascader";
 import { CascaderValidationSection } from "./selectInputConstants";
 
-import { MarginControl } from "../../controls/marginControl";	
+import { MarginControl } from "../../controls/marginControl";
 import { PaddingControl } from "../../controls/paddingControl";
 import { SelectChildrenMap } from "./selectCompConstants";
 import { useContext } from "react";
@@ -37,11 +37,15 @@ export const CascaderChildren = {
   onEvent: SelectEventHandlerControl,
   allowClear: BoolControl,
   options: JSONObjectArrayControl,
-  style: styleControl(CascaderStyle),
+  style: styleControl(InputFieldStyle , 'style'),
+  labelStyle: styleControl(LabelStyle.filter((style) => ['accent', 'validate'].includes(style.name) === false), 'labelStyle'),
   showSearch: BoolControl.DEFAULT_TRUE,
   viewRef: RefControl<CascaderRef>,
-  margin: MarginControl,	
+  margin: MarginControl,
   padding: PaddingControl,
+  inputFieldStyle:styleControl(CascaderStyle , 'inputFieldStyle'),
+  childrenInputFieldStyle:styleControl(ChildrenMultiSelectStyle),
+  animationStyle:styleControl(AnimationStyle ,'animationStyle')
 };
 
 export const CascaderPropertyView = (
@@ -74,9 +78,23 @@ export const CascaderPropertyView = (
     )}
 
     {["layout", "both"].includes(useContext(EditorContext).editorModeStatus) && (
-      <Section name={sectionNames.style}>
-        {children.style.getPropertyView()}
-      </Section>
+      <>
+        <Section name={sectionNames.style}>
+          {children.style.getPropertyView()}
+        </Section>
+        <Section name={sectionNames.labelStyle}>
+          {children.labelStyle.getPropertyView()}
+        </Section>
+        <Section name={sectionNames.inputFieldStyle}>
+          {children.inputFieldStyle.getPropertyView()}
+        </Section>
+        <Section name={sectionNames.childrenInputFieldStyle}>
+          {children.childrenInputFieldStyle.getPropertyView()}
+        </Section>
+        <Section name={sectionNames.animationStyle} hasTooltip={true}>
+          {children.animationStyle.getPropertyView()}
+        </Section>
+      </>
     )}
   </>
 );

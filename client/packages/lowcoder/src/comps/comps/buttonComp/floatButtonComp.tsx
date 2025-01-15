@@ -3,26 +3,45 @@ import { BoolControl } from "comps/controls/boolControl";
 import { stringExposingStateControl } from "comps/controls/codeStateControl";
 import { dropdownControl } from "comps/controls/dropdownControl";
 import { styleControl } from "comps/controls/styleControl";
-import { FloatButtonStyle, FloatButtonStyleType } from "comps/controls/styleControlConstants";
+import { AnimationStyle, AnimationStyleType, BadgeStyle, BadgeStyleType, FloatButtonStyle, FloatButtonStyleType } from "comps/controls/styleControlConstants";
 import { UICompBuilder } from "comps/generators/uiCompBuilder";
 import { NameConfig, NameConfigHidden, withExposingConfigs } from "comps/generators/withExposing";
 import { Section, sectionNames } from "lowcoder-design";
 import { hiddenPropertyView } from "comps/utils/propertyUtils";
 import { trans } from "i18n";
-import { StringControl } from "comps/controls/codeControl";
+import { StringControl, NumberControl } from "comps/controls/codeControl";
 import { FloatButton } from 'antd';
-import { withDefault } from "../../generators";
+import { withDefault, MultiCompBuilder, valueComp } from "../../generators";
 import { IconControl } from "comps/controls/iconControl";
 import styled from "styled-components";
+import { manualOptionsControl } from "comps/controls/optionsControl";
+import { useContext, useEffect } from "react";
 import { ButtonEventHandlerControl, MultiCompBuilder, NumberControl, manualOptionsControl, valueComp } from "@lowcoder-ee/index.sdk";
+
+const StyledFloatButton = styled(FloatButton)<{
+    $animationStyle: AnimationStyleType;
+}>`
+  ${(props) => props.$animationStyle}
+`;
 
 const Wrapper = styled.div<{ $style: FloatButtonStyleType }>`
     width: 0px;
     height: 0px;
     overflow: hidden;
+    
+    .ant-float-btn-group {
+        inset-block-end: 0px;
+        right: -40px;
+    }
     .ant-float-btn {
         right: -20px;
         inset-block-end: -8px;
+    }
+    .ant-float-btn-primary .ant-float-btn-body {
+    background: ${(props) => props.$style.background};
+    border: ${(props) => props.$style.border};
+    border-style: ${(props) => props.$style.borderStyle};
+    border-width: ${(props) => props.$style.borderWidth};
     }
 `
 const buttonTypeOption = [
@@ -46,11 +65,9 @@ const buttonGroupOption = new MultiCompBuilder(
         label: StringControl,
         badge: withDefault(NumberControl, 0),
         description: withDefault(StringControl, ''),
-        buttonType: dropdownControl(buttonTypeOption, 'custom'),
         icon: withDefault(IconControl, '/icon:antd/questioncircleoutlined'),
         onEvent: ButtonEventHandlerControl,
         hidden: BoolControl,
-        visibilityHeight: withDefault(NumberControl, 0),
     },
     (props) => props
 )
@@ -63,6 +80,7 @@ const buttonGroupOption = new MultiCompBuilder(
             {children.buttonType.propertyView({ label: trans("floatButton.buttonType"), radioButton: true })}
             {children.buttonType.getView() === 'custom' && children.icon.propertyView({ label: trans("icon") })}
             {children.buttonType.getView() !== 'custom' && children.visibilityHeight.propertyView({ label: trans("floatButton.visibilityHeight"), tooltip: trans("floatButton.visibilityHeightDesc") })}
+            {children.icon.propertyView({ label: trans("icon") })}
             {children.onEvent.getPropertyView()}
         </>
     ))
@@ -73,7 +91,9 @@ const childrenMap = {
     includeMargin: BoolControl.DEFAULT_TRUE,
     image: StringControl,
     icon: withDefault(IconControl, '/icon:antd/questioncircleoutlined'),
-    style: styleControl(FloatButtonStyle),
+    badgeStyle: styleControl(BadgeStyle),
+    style: styleControl(FloatButtonStyle , 'style'),
+    animationStyle: styleControl(AnimationStyle , 'animationStyle'),
     buttons: manualOptionsControl(buttonGroupOption, {
         initOptions: [
             { id: 0, label: trans("optionsControl.optionI", { i: '1' }), icon: "/icon:antd/filetextoutlined", badge: '1' },
@@ -89,17 +109,17 @@ const childrenMap = {
 const FloatButtonView = (props: RecordConstructorToView<typeof childrenMap>) => {
     const renderButton = (button: any, onlyOne?: boolean) => {
         return !button?.hidden ? (button?.buttonType === 'custom' ?
-            (<FloatButton
+            (<StyledFloatButton
                 key={button?.id}
                 icon={button?.icon}
                 onClick={() => button.onEvent("click")}
                 tooltip={button?.label}
                 description={button?.description}
-                badge={{ count: button?.badge, color: props.style.badgeColor, dot: props?.dot }}
+                badge={{ count: button?.badge, color: props.badgeStyle.badgeColor, dot: props?.dot }}
                 type={onlyOne ? props.buttonTheme : 'default'}
                 shape={props.shape}
             />) :
-            (<FloatButton.BackTop
+            (<StyledFloatButton.BackTop
                 description={button?.description}
                 tooltip={button?.label}
                 onClick={() => button.onEvent("click")}
@@ -110,20 +130,19 @@ const FloatButtonView = (props: RecordConstructorToView<typeof childrenMap>) => 
             : ''
     }
     return (
-        <Wrapper
-            $style={props.style}
-        >
+        <Wrapper $badgeStyle={props.badgeStyle} $style={props.style}>
             {props.buttons.length === 1 ? (renderButton(props.buttons[0], true)) :
-                (<FloatButton.Group
+                (<StyledFloatButton.Group
                     trigger="hover"
                     style={{ right: -20 }}
                     icon={props.icon}
                     shape={props.shape}
                     badge={{ count: props.buttons.reduce((sum, i) => sum + (i.buttonType === 'custom' && !i.hidden ? i.badge : 0), 0), color: props.style.badgeColor, dot: props.dot }}
+                    badge={{ count: props.buttons.reduce((sum, i) => sum + (i.buttonType === 'custom' && !i.hidden ? i.badge : 0), 0), color: props.badgeStyle.badgeColor, dot: props.dot }}
                     type={props.buttonTheme}
                 >
                     {props.buttons.map((button: any) => renderButton(button))}
-                </FloatButton.Group>)
+                </StyledFloatButton.Group>)
             }
         </Wrapper>
     );
@@ -143,7 +162,12 @@ let FloatButtonBasicComp = (function () {
                 <Section name={sectionNames.layout}>
                     {hiddenPropertyView(children)}
                 </Section>
+                <Section name={sectionNames.badgeStyle}>{children.badgeStyle.getPropertyView()}</Section>
+
                 <Section name={sectionNames.style}>{children.style.getPropertyView()}</Section>
+                <Section name={sectionNames.animationStyle} hasTooltip={true}>
+                    {children.animationStyle.getPropertyView()}
+                </Section>
             </>
         ))
         .build();

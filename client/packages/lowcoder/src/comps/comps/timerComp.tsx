@@ -1,6 +1,6 @@
 import { CompAction, RecordConstructorToView, changeChildAction } from "lowcoder-core";
 import { styleControl } from "comps/controls/styleControl";
-import { timerStyle, timerStyleType } from "comps/controls/styleControlConstants";
+import { AnimationStyle, AnimationStyleType, startButtonStyle, StartButtonStyleType, timerStyle, timerStyleType } from "comps/controls/styleControlConstants";
 import { UICompBuilder } from "comps/generators/uiCompBuilder";
 import { NameConfig, NameConfigHidden, withExposingConfigs } from "comps/generators/withExposing";
 import { Section, sectionNames } from "lowcoder-design";
@@ -15,17 +15,35 @@ import { EditorContext } from "comps/editorState";
 import { dropdownControl } from "../controls/dropdownControl";
 import { BoolControl, stringExposingStateControl } from "@lowcoder-ee/index.sdk";
 
-const Container = styled.div<{ $style: timerStyleType | undefined }>`
+const Container = styled.div<{
+  $style: timerStyleType | undefined;
+  $animationStyle:AnimationStyleType;
+}>`
   align-items: center;
   cursor: pointer;
   font-size: 2.9em;
   text-align: center;
   word-wrap: break-word;
   line-height: initial;
+  ${props=>props.$animationStyle}
   background-color: ${props => props.$style?.background};
-  border: 1px solid ${props => props.$style?.border};
+ font-weight: ${props=>props?.$style?.textWeight};
+border-radius: ${props=>props?.$style?.radius};
+font-size: ${props=>props?.$style?.textSize};
+rotate: ${props=>props?.$style?.rotation};
+text-transform: ${props=>props?.$style?.textTransform};
+color: ${props=>props?.$style?.text};
+border: 1px solid ${props => props?.$style?.border};
+border-style: ${props=>props?.$style?.borderStyle};
   border-radius: ${props => props.$style?.radius};
-  color: ${props => props.$style?.fontColor};
+
+border-width: ${props=>props?.$style?.borderWidth};
+font-family: ${props=>props?.$style?.fontFamily};
+font-style: ${props=>props?.$style?.fontStyle};
+margin: ${props=>props?.$style?.margin};
+padding: ${props=>props?.$style?.padding};
+background: ${props=>props?.$style?.background};
+text-decoration: ${props=>props?.$style?.textDecoration};
 `;
 
 const ButtonWarrper = styled.div`
@@ -37,6 +55,27 @@ const ButtonWarrper = styled.div`
   padding-bottom: 10px;
   margin-top: -10px;
 `;
+
+const StyledButton = styled(Button)<{ $style: StartButtonStyleType }>`
+background-color: ${props=>props.$style.background};
+font-weight: ${props=>props.$style.textWeight};
+border-radius: ${props=>props.$style.radius};
+font-size: ${props=>props.$style.textSize};
+rotate: ${props=>props.$style.rotation};
+text-transform: ${props=>props.$style.textTransform};
+color: ${props=>props.$style.text};
+border: ${props => props.$style.border};
+border-style: ${props=>props.$style.borderStyle};
+border-width: ${props=>props.$style.borderWidth};
+font-family: ${props=>props.$style.fontFamily};
+font-style: ${props=>props.$style.fontStyle};
+margin: ${props=>props.$style.margin};
+padding: ${props=>props.$style.padding};
+background: ${props=>props.$style.background};
+text-decoration: ${props=>props.$style.textDecoration};
+`;
+
+
 
 function formatTimeDifference(timeDifference: number) {
   // 计算时、分、秒、毫秒
@@ -63,6 +102,9 @@ const timerTypeOptions = [
 
 const childrenMap = {
   style: styleControl(timerStyle),
+  animationStyle: styleControl(AnimationStyle),
+  startButtonStyle: styleControl(startButtonStyle),
+  resetButtonStyle: styleControl(startButtonStyle),
   onEvent: eventHandlerControl(EventOptions),
   defaultValue: stringExposingStateControl("defaultValue", '00:00:00:000'),
   timerType: dropdownControl(timerTypeOptions, 'timer'),
@@ -155,13 +197,12 @@ const AvatarGroupView = (props: RecordConstructorToView<typeof childrenMap> & { 
   }
 
   return (
-    <Container
-      $style={props.style}
-    >
+    <Container $style={props.style} $animationStyle={props.animationStyle}>
       {formatTimeDifference(elapsedTime)}
       <ButtonWarrper hidden={props.hideButton}>
         <Space>
-          <Button
+          <StyledButton
+            $style={props.startButtonStyle}
             disabled={!buttonState}
             type={timerState === 'stoped' ? "primary" : 'default'}
             onClick={() => {
@@ -169,11 +210,12 @@ const AvatarGroupView = (props: RecordConstructorToView<typeof childrenMap> & { 
               else if (timerState === 'started') pauseAction()
               else if (timerState === 'paused') resumeAction()
             }}
-          >{timerState === 'stoped' ? trans('timer.start') : (timerState === 'started' ? trans('timer.pause') : trans('timer.resume'))}</Button>
-          <Button
-            onClick={() => resetAction()}
+          >{timerState === 'stoped' ? trans('timer.start') : (timerState === 'started' ? trans('timer.pause') : trans('timer.resume'))}</StyledButton>
+          <StyledButton
+          $style={props.resetButtonStyle}
+          onClick={() => resetAction()}
           >{trans('timer.reset')}
-          </Button>
+          </StyledButton>
         </Space>
       </ButtonWarrper>
     </Container>
@@ -205,9 +247,20 @@ let AvatarGroupBasicComp = (function () {
         )}
 
         {["layout", "both"].includes(useContext(EditorContext).editorModeStatus) && (
+          <>
           <Section name={sectionNames.style}>
             {children.style.getPropertyView()}
           </Section>
+          <Section name={sectionNames.animationStyle} hasTooltip={true}>
+            {children.animationStyle.getPropertyView()}
+          </Section>
+          <Section name={sectionNames.startButtonStyle}>
+            {children.startButtonStyle.getPropertyView()}
+          </Section>
+          <Section name={sectionNames.resetButtonStyle}>
+            {children.resetButtonStyle.getPropertyView()}
+          </Section>
+          </>
         )}
       </>
     ))

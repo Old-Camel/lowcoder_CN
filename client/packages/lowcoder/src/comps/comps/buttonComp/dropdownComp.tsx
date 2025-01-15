@@ -3,13 +3,13 @@ import { default as Dropdown } from "antd/es/dropdown";
 import { default as DropdownButton } from "antd/es/dropdown/dropdown-button";
 import { BoolControl } from "comps/controls/boolControl";
 import { BoolCodeControl, StringControl } from "comps/controls/codeControl";
-import { ButtonStyleType } from "comps/controls/styleControlConstants";
+import { DropdownStyle, DropdownStyleType } from "comps/controls/styleControlConstants";
 import { withDefault } from "comps/generators";
 import { UICompBuilder } from "comps/generators/uiCompBuilder";
 import { disabledPropertyView, hiddenPropertyView } from "comps/utils/propertyUtils";
 import { Section, sectionNames } from "lowcoder-design";
 import { trans } from "i18n";
-import React, { ReactElement, useContext } from "react";
+import React, { ReactElement, useContext, useEffect } from "react";
 import { EditorContext } from "comps/editorState";
 import styled from "styled-components";
 import { ButtonEventHandlerControl } from "../../controls/eventHandlerControl";
@@ -21,6 +21,7 @@ import {
   ButtonStyleControl,
   getButtonStyle,
 } from "./buttonCompConstants";
+import { styleControl } from "@lowcoder-ee/comps/controls/styleControl";
 import { IconControl } from "@lowcoder-ee/index.sdk";
 
 
@@ -33,13 +34,13 @@ const StyledDropdownButton = styled(DropdownButton)`
   }
 `;
 
-const LeftButtonWrapper = styled.div<{ $buttonStyle: ButtonStyleType }>`
+const LeftButtonWrapper = styled.div<{ $buttonStyle: DropdownStyleType }>`
   width: calc(100%);
   ${(props) => `margin: ${props.$buttonStyle.margin};`}
   margin-right: 0;
   .ant-btn span {
-    ${(props) => `text-decoration: ${props.$buttonStyle.textDecoration};`}
-    ${(props) => `font-family: ${props.$buttonStyle.fontFamily};`}
+    ${(props) => props.$buttonStyle.textDecoration !== undefined ? `text-decoration: ${props.$buttonStyle.textDecoration};` : ''}
+    ${(props) => props.$buttonStyle.fontFamily !== undefined ? `font-family: ${props.$buttonStyle.fontFamily};` : ''}
   }
   
   .ant-btn {
@@ -49,22 +50,24 @@ const LeftButtonWrapper = styled.div<{ $buttonStyle: ButtonStyleType }>`
     height: 100%;
     &.ant-btn-default {
       margin: 0 !important;
+
       ${(props) => `border-radius: ${props.$buttonStyle.radius} 0 0 ${props.$buttonStyle.radius};`}
       ${(props) => `text-transform: ${props.$buttonStyle.textTransform};`}
       ${(props) => `font-weight: ${props.$buttonStyle.textWeight};`}
     }
-    ${(props) => `background-color: ${props.$buttonStyle.background};`}
+    ${(props) => `background: ${props.$buttonStyle.background};`}
     ${(props) => `color: ${props.$buttonStyle.text};`}
     ${(props) => `padding: ${props.$buttonStyle.padding};`}
     ${(props) => `font-size: ${props.$buttonStyle.textSize};`}
     ${(props) => `font-style: ${props.$buttonStyle.fontStyle};`}
 
     width: 100%;
+    line-height:${(props) => props.$buttonStyle.lineHeight}; 
   }
   
 `;
 
-const RightButtonWrapper = styled.div<{ $buttonStyle: ButtonStyleType }>`
+const RightButtonWrapper = styled.div<{ $buttonStyle: DropdownStyleType }>`
   ${(props) => `margin: ${props.$buttonStyle.margin};`}
   margin-left: ${props => props.$buttonStyle.borderWidth === '0px' ? '1px' : '0px'};
   .ant-btn {
@@ -94,8 +97,9 @@ const DropdownTmpComp = (function () {
     options: DropdownOptionControl,
     disabled: BoolCodeControl,
     onEvent: ButtonEventHandlerControl,
-    style: withDefault(ButtonStyleControl, { border: "#FFFFFF" }),
-    icon: withDefault(IconControl, "/icon:antd/ellipsisoutlined"),
+      style: withDefault(styleControl(DropdownStyle, 'style'), { border: "#FFFFFF" }),
+      icon: withDefault(IconControl, "/icon:antd/ellipsisoutlined"),
+
   };
   return new UICompBuilder(childrenMap, (props) => {
     const hasIcon =
@@ -117,13 +121,14 @@ const DropdownTmpComp = (function () {
         items={items}
         onClick={({ key }) => {
           const item = items.find((o) => o.key === key);
-          item && props.options[item.index]?.onEvent("click");
+          const itemIndex = props.options.findIndex(option => option.label === item?.label);
+          item && props.options[itemIndex]?.onEvent("click");
         }}
       />
     );
 
     return (
-      <ButtonCompWrapper disabled={props.disabled}>
+      <ButtonCompWrapper $disabled={props.disabled}>
         {props.onlyMenu ? (
           <Dropdown
             disabled={props.disabled}

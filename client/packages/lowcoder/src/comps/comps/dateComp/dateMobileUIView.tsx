@@ -7,9 +7,15 @@ import { CanvasContainerID } from "constants/domLocators";
 import { trans } from "i18n";
 import React from "react";
 import { DataUIViewProps } from "comps/comps/dateComp/dateUIView";
-import { SwapRightOutlined } from "@ant-design/icons";
+import { default as SwapRightOutlined } from "@ant-design/icons/SwapRightOutlined"
 import { DateRangeUIViewProps } from "comps/comps/dateComp/dateRangeUIView";
 import { DateCompViewProps } from "comps/comps/dateComp/dateComp";
+import type { DatePickerProps } from "antd/es/date-picker";
+import type { Dayjs } from "dayjs";
+
+interface DateMobileUIViewProps extends Omit<DataUIViewProps, 'onChange'> {
+  onChange: (value: dayjs.Dayjs | null) => void;
+}
 
 const handleClick = async (
   params: Pick<
@@ -17,8 +23,9 @@ const handleClick = async (
     "showTime" | "minDate" | "maxDate" | "disabledTime" | "onFocus" | "onBlur"
   > & {
     value: dayjs.Dayjs | null;
-    onChange: (value: dayjs.Dayjs | null) => void;
-    picker?: PickerMode
+      onChange: DatePickerProps<Dayjs>['onChange'];
+      picker?: PickerMode
+
   }
 ) => {
   const MobileDatePicker = (await import("antd-mobile/es/components/date-picker")).default;
@@ -31,6 +38,8 @@ const handleClick = async (
   MobileDatePicker.prompt({
     getContainer: () => document.querySelector(`#${CanvasContainerID}`) || document.body,
     mouseWheel: true,
+    cancelText: trans("cancel"),
+    confirmText: trans("ok"),
     destroyOnClose: true,
     closeOnMaskClick: true,
     min: (params.minDate && min.isValid()) ? min.toDate() : undefined,
@@ -44,7 +53,8 @@ const handleClick = async (
     },
     onConfirm: (value) => {
       const time = dayjs(value);
-      params.onChange(time);
+      const timeString = time.format(params.showTime ? DATE_TIME_FORMAT : DATE_FORMAT);
+      params.onChange?.(time, timeString);
     },
     onClose: params.onBlur,
   });

@@ -8,7 +8,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.lowcoder.api.framework.view.ResponseView;
+import org.lowcoder.infra.constant.NewUrl;
 import org.lowcoder.infra.util.LogUtils;
 import org.lowcoder.sdk.exception.BaseException;
 import org.lowcoder.sdk.exception.BizError;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
@@ -51,6 +54,9 @@ public class GlobalExceptionHandler {
             apiPerfHelper.perf(e.getError(), exchange.getRequest().getPath());
             doLog(e, ctx, e.getError().logVerbose());
             Locale locale = getLocale(ctx);
+            if (e.getHeaders() != null && !e.getHeaders().isEmpty()) {
+                exchange.getResponse().getHeaders().addAll(e.getHeaders());
+            }
             return Mono.just(error(e.getBizErrorCode(), e.getMessage(locale)));
         });
     }
@@ -128,6 +134,23 @@ public class GlobalExceptionHandler {
             doLog(e, ctx, bizError.logVerbose());
             return Mono.just(error(bizError.getBizErrorCode(), e.getMessage()));
         });
+    }
+
+    @ExceptionHandler
+    @ResponseBody
+    public Mono<ResponseView<?>> catchResponseStatusException(ResponseStatusException e, ServerWebExchange exchange) {
+        if (StringUtils.startsWith(exchange.getRequest().getPath().toString(), NewUrl.PLUGINS_URL + "/")) {
+            BizError bizError = BizError.PLUGIN_ENDPOINT_ERROR;
+            exchange.getResponse().setStatusCode(e.getStatusCode());
+            return Mono.deferContextual(ctx -> {
+                apiPerfHelper.perf(bizError, exchange.getRequest().getPath());
+                doLog(e, ctx, bizError.logVerbose());
+                return Mono.just(error(bizError.getBizErrorCode(), e.getMessage() + " - path: " + exchange.getRequest().getPath()));
+            });
+
+        } else {
+            return catchException(e, exchange);
+        }
     }
 
     @ExceptionHandler

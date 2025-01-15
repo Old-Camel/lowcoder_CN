@@ -3,6 +3,10 @@ import { RecordConstructorToView } from "lowcoder-core";
 import { styleControl } from "comps/controls/styleControl";
 import _ from "lodash";
 import {
+  avatarContainerStyle,
+  AvatarContainerStyleType,
+  avatarLabelStyle,
+  AvatarLabelStyleType,
   AvatarStyle,
   AvatarStyleType,
 } from "comps/controls/styleControlConstants";
@@ -37,13 +41,22 @@ const AvatarWrapper = styled(Avatar) <AvatarProps & { $cursorPointer: boolean, $
   cursor: ${(props) => props.$cursorPointer ? 'pointer' : ''};
 `;
 
-const Warpper = styled.div <{ iconSize: number, labelPosition: string }>`
+const Wrapper = styled.div <{ iconSize: number, labelPosition: string,$style: AvatarContainerStyleType}>`
 display: flex;
 width: 100%;
 height: 100%;
 padding: 0px;
+
 align-items: center;
 flex-direction: ${(props) => props.labelPosition === 'left' ? 'row' : 'row-reverse'};
+${(props) => {
+    return (
+      props.$style && {
+        ...props.$style,
+        borderRadius: props.$style.radius,
+      }
+    );
+  }}
 `
 
 const LabelWarpper = styled.div<{ iconSize: number, alignmentPosition: string }>`
@@ -60,15 +73,37 @@ max-width: 100%;
 overflow: hidden;
 text-overflow: ellipsis;
 white-space: nowrap;
-font-weight: bold;
-color: ${(props) => props.color};
+font-weight: ${props=>props.$style.textWeight};
+border-radius: ${props=>props.$style.radius};
+font-size: ${props=>props.$style.textSize};
+text-transform: ${props=>props.$style.textTransform};
+color: ${props=>props.$style.text};
+border: ${props => props.$style.border};
+border-style: ${props=>props.$style.borderStyle};
+border-width: ${props=>props.$style.borderWidth};
+font-family: ${props=>props.$style.fontFamily};
+font-style: ${props=>props.$style.fontStyle};
+margin: ${props=>props.$style.margin};
+padding: ${props=>props.$style.padding};
+background: ${props=>props.$style.background};
+text-decoration: ${props=>props.$style.textDecoration};
 `
-const CaptionSpan = styled.span<{ color: string }>`
-max-width: 100%;
-overflow: hidden;
-text-overflow: ellipsis;
-white-space: nowrap;
-color: ${(props) => props.color};
+const CaptionSpan = styled.span<{ $style:AvatarLabelStyleType }>`
+
+font-weight: ${props=>props.$style.textWeight};
+border-radius: ${props=>props.$style.radius};
+font-size: ${props=>props.$style.textSize};
+text-transform: ${props=>props.$style.textTransform};
+color: ${props=>props.$style.text};
+border: ${props => props.$style.border};
+border-style: ${props=>props.$style.borderStyle};
+border-width: ${props=>props.$style.borderWidth};
+font-family: ${props=>props.$style.fontFamily};
+font-style: ${props=>props.$style.fontStyle};
+margin: ${props=>props.$style.margin};
+padding: ${props=>props.$style.padding};
+background: ${props=>props.$style.background};
+text-decoration: ${props => props.$style.textDecoration};
 `
 const EventOptions = [clickEvent] as const;
 const sharpOptions = [
@@ -82,7 +117,10 @@ const sideOptions = [
 ] as const;
 
 const childrenMap = {
-  style: styleControl(AvatarStyle),
+  style: styleControl(avatarContainerStyle , 'style'),
+  avatarStyle: styleControl(AvatarStyle , 'avatarStyle'),
+  labelStyle: styleControl(avatarLabelStyle , 'labelStyle'),
+  captionStyle: styleControl(avatarLabelStyle , 'captionStyle'),
   icon: withDefault(IconControl, "/icon:solid/user"),
   iconSize: withDefault(NumberControl, 40),
   onEvent: eventHandlerControl(EventOptions),
@@ -98,12 +136,11 @@ const childrenMap = {
   ...budgeChildren,
 };
 
-const IconView = (props: RecordConstructorToView<typeof childrenMap>) => {
+const AvatarView = (props: RecordConstructorToView<typeof childrenMap>) => {
   const { shape, title, src, iconSize } = props;
   const comp = useContext(EditorContext).getUICompByName(useContext(CompNameContext));
-  const eventsCount = comp ? Object.keys(comp?.children.comp.children.onEvent.children).length : 0;
-  const hasIcon =
-    props.options.findIndex((option) => (option.prefixIcon as ReactElement)?.props.value) > -1;
+  // const eventsCount = comp ? Object.keys(comp?.children.comp.children.onEvent.children).length : 0;
+  const hasIcon = props.options.findIndex((option) => (option.prefixIcon as ReactElement)?.props.value) > -1;
   const items = props.options
     .filter((option) => !option.hidden)
     .map((option, index) => ({
@@ -128,38 +165,39 @@ const IconView = (props: RecordConstructorToView<typeof childrenMap>) => {
       disabled={!props.enableDropdownMenu}
       dropdownRender={() => menu}
     >
-      <Warpper iconSize={props.iconSize} labelPosition={props.labelPosition}>
+      <Wrapper iconSize={props.iconSize} labelPosition={props.labelPosition} $style={props.style}>
         <Badge
-          count={props.budgeCount.value}
-          dot={props.budgeType === 'dot'}
-          size={props.budgeSize}
+          count={props.badgeCount.value}
+          dot={props.badgeType === 'dot'}
+          size={props.badgeSize}
           overflowCount={props.overflowCount}
-          title={props.budgeTitle}
+          title={props.badgeTitle}
           offset={props.shape === 'circle' ? [-2, 6] : [0, 0]}
         >
           <AvatarWrapper
             size={iconSize}
             icon={title.value !== '' ? null : props.icon}
             shape={shape}
-            $style={props.style}
+            $style={props.avatarStyle}
             src={src.value}
-            $cursorPointer={eventsCount > 0}
+            // $cursorPointer={eventsCount > 0}
             onClick={() => props.onEvent("click")}
           >
             {title.value}
           </AvatarWrapper>
         </Badge>
-        <LabelWarpper iconSize={props.iconSize} alignmentPosition={props.alignmentPosition}>
-          <LabelSpan color={props.style.label}>{props.avatarLabel.value}</LabelSpan>
-          <CaptionSpan color={props.style.caption}>{props.avatarCatption.value}</CaptionSpan>
-        </LabelWarpper>
-      </Warpper>
+        <LabelWrapper iconSize={props.iconSize} alignmentPosition={props.alignmentPosition}>
+          <LabelSpan $style={props.labelStyle}>{props.avatarLabel.value}</LabelSpan>
+          <CaptionSpan $style={props.captionStyle}>{props.avatarCatption.value}</CaptionSpan>
+        </LabelWrapper>
+      </Wrapper>
     </Dropdown>
   );
 };
 
-let IconBasicComp = (function () {
-  return new UICompBuilder(childrenMap, (props) => <IconView {...props} />)
+let AvatarBasicComp = (function () {
+  return new UICompBuilder(childrenMap, (props) => {
+    return(<AvatarView {...props} />)})
     .setPropertyViewFn((children) => (
       <>
         <Section name={sectionNames.basic}>
@@ -220,6 +258,15 @@ let IconBasicComp = (function () {
         </Section>
         <Section name={sectionNames.style}>
           {children.style.getPropertyView()}
+        </Section>
+        <Section name={sectionNames.avatarStyle}>
+          {children.avatarStyle.getPropertyView()}
+        </Section>
+        <Section name={sectionNames.labelStyle}>
+          {children.labelStyle.getPropertyView()}
+        </Section>
+        <Section name={sectionNames.captionStyle}>
+          {children.captionStyle.getPropertyView()}
         </Section>
       </>
     ))

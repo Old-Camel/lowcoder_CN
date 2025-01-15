@@ -27,6 +27,10 @@ import { RefControl } from "comps/controls/refControl";
 import { BudgeBasicSection, budgeChildren } from "../budgeComp/budgeConstants";
 import React, { useContext } from "react";
 
+import React, { useContext, useEffect } from "react";
+import { AnimationStyle } from "@lowcoder-ee/comps/controls/styleControlConstants";
+import { styleControl } from "@lowcoder-ee/comps/controls/styleControl";
+
 const FormLabel = styled(CommonBlueLabel)`
   font-size: 13px;
   margin-right: 4px;
@@ -130,20 +134,23 @@ const ButtonTmpComp = (function () {
     prefixIcon: IconControl,
     suffixIcon: IconControl,
     style: ButtonStyleControl,
+    animationStyle: styleControl(AnimationStyle, 'animationStyle'),
     viewRef: RefControl<HTMLElement>,
     ...budgeChildren,
   };
-  return new UICompBuilder(childrenMap, (props) => (
-    <ButtonCompWrapper disabled={props.disabled}>
-      <EditorContext.Consumer>
-        {(editorState) => (
-        <Badge100
-        count={props.budgeCount.value}
-        size={props.budgeSize}
-        overflowCount={props.overflowCount}
-        dot={props.budgeType==='dot'}
-        title={props.budgeTitle}
-        >
+  return new UICompBuilder(childrenMap, (props) => {
+    return(
+
+        <ButtonCompWrapper disabled={props.disabled}>
+            <EditorContext.Consumer>
+                {(editorState) => (
+                    <Badge100
+                        count={props.budgeCount.value}
+                        size={props.budgeSize}
+                        overflowCount={props.overflowCount}
+                        dot={props.budgeType==='dot'}
+                        title={props.budgeTitle}
+                    >
           <Button100
             ref={props.viewRef}
             $buttonStyle={props.style}
@@ -162,11 +169,13 @@ const ButtonTmpComp = (function () {
             }
             {props.suffixIcon && <IconWrapper>{props.suffixIcon}</IconWrapper>}
           </Button100>
-        </Badge100>
-        )}
-      </EditorContext.Consumer>
-    </ButtonCompWrapper>
-  ))
+                    </Badge100>
+
+                )}
+            </EditorContext.Consumer>
+        </ButtonCompWrapper>
+    );
+  })
     .setPropertyViewFn((children) => (
       <>
         <Section name={sectionNames.basic}>

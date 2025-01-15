@@ -4,6 +4,7 @@ import { default as Button } from "antd/es/button";
 import { default as Checkbox} from "antd/es/checkbox";
 import { default as Form } from "antd/es/form";
 import { UnderlineCss } from "lowcoder-design";
+import Steps from "antd/es/steps";
 
 const btnLoadingCss = css`
   > .ant-btn-loading-icon .anticon {
@@ -61,10 +62,11 @@ export const SpanStyled = styled.div<{ disabled: boolean }>`
   align-items: center;
   height: 100%;
 
-  img {
-    width: 32px;
-    height: 32px;
+  img, .sourceIcon {
+    width: 25px;
+    height: 25px;
     margin-right: 12px;
+    text-align: center;
     opacity: ${(props) => props.disabled && "0.4"};
   }
 
@@ -256,34 +258,15 @@ export const DeleteWrapper = styled.div`
   line-height: 19px;
 
   .danger-tip {
-    height: 32px;
-    padding: 0 16px 0 8px;
-    margin: 5px 0 8px 0;
-    background: #fff3f1;
+    max-width: 440px;
+    padding: 8px 16px;
+    margin: 5px 0 12px 0;
     border-radius: 4px;
-    display: inline-flex;
     align-items: center;
 
     svg {
       margin-right: 8px;
     }
-  }
-
-  .ant-btn {
-    min-width: 84px;
-    display: block;
-    padding: 4px 8px;
-    background: #fef4f4;
-    border: 1px solid #fccdcd;
-    font-size: 13px;
-    color: #f73131;
-
-    &:hover,
-    &.ant-btn-loading {
-      background: #feecec;
-    }
-
-    ${btnLoadingCss}
   }
 `;
 
@@ -326,5 +309,20 @@ export const CreateButton = styled(Button)`
     margin-right: 2px;
     width: 12px;
     height: 12px;
+  }
+`;
+
+export const StyledSteps = styled(Steps)`
+  .ant-steps-item-icon {
+    width: 25px;
+    height: 25px;
+    font-size: 10px;
+    line-height: 26px;
+  }
+
+  .ant-steps-item-title {
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: bold;
   }
 `;

@@ -1,6 +1,6 @@
 import { CompAction, RecordConstructorToView, changeChildAction } from "lowcoder-core";
 import { styleControl } from "comps/controls/styleControl";
-import { QRCodeStyle, QRCodeStyleType, avatarGroupStyle, avatarGroupStyleType } from "comps/controls/styleControlConstants";
+import { QRCodeStyle, QRCodeStyleType, avatarGroupStyle, AvatarGroupStyleType, avatarContainerStyle, AvatarContainerStyleType } from "comps/controls/styleControlConstants";
 import { UICompBuilder } from "comps/generators/uiCompBuilder";
 import { NameConfig, NameConfigHidden, withExposingConfigs } from "comps/generators/withExposing";
 import { AlignCenter, AlignLeft, AlignRight, Section, sectionNames } from "lowcoder-design";
@@ -10,7 +10,7 @@ import { NumberControl, StringControl } from "comps/controls/codeControl";
 import { Avatar, Tooltip } from "antd";
 import { clickEvent, eventHandlerControl, refreshEvent } from "../controls/eventHandlerControl";
 import styled from "styled-components";
-import { useContext, ReactElement } from "react";
+import { useContext, ReactElement, useEffect } from "react";
 import { MultiCompBuilder, stateComp, withDefault } from "../generators";
 import { EditorContext } from "comps/editorState";
 import { IconControl } from "../controls/iconControl";
@@ -18,7 +18,7 @@ import { ColorControl } from "../controls/colorControl";
 import { optionsControl } from "../controls/optionsControl";
 import { BoolControl } from "../controls/boolControl";
 import { dropdownControl } from "../controls/dropdownControl";
-import { JSONObject } from "@lowcoder-ee/index.sdk";
+import { JSONObject } from "util/jsonTypes";
 
 const MacaroneList = [
   '#fde68a',
@@ -31,13 +31,20 @@ const MacaroneList = [
   '#fcd6bb',
 ]
 
-const Container = styled.div<{ $style: avatarGroupStyleType | undefined, alignment: string }>`
+const Container = styled.div<{ $style: AvatarContainerStyleType | undefined, alignment: string }>`
   height: 100%;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: ${props => props.alignment};
   cursor: pointer;
+  background: ${props => props?.$style?.background};
+  margin: ${props => props?.$style?.margin};
+  padding: ${props => props?.$style?.padding};
+  border: ${props => props?.$style?.border};
+  border-style: ${props => props?.$style?.borderStyle};
+  border-radius: ${props => props?.$style?.radius};
+  border-width: ${props => props?.$style?.borderWidth};
 `;
 
 const DropdownOption = new MultiCompBuilder(
@@ -65,7 +72,7 @@ const DropdownOption = new MultiCompBuilder(
       })}
       {children.color.propertyView({ label: trans("style.fill") })}
       {children.backgroundColor.propertyView({ label: trans("style.background") })}
-      {children.Tooltip.propertyView({ label: trans("prop.tooltip") })}
+      {children.Tooltip.propertyView({ label: trans("badge.tooltip") })}
     </>
   ))
   .build();
@@ -79,7 +86,8 @@ export const alignOptions = [
 ] as const;
 
 const childrenMap = {
-  style: styleControl(avatarGroupStyle),
+  avatar: styleControl(avatarGroupStyle , 'avatar'),
+  style: styleControl(avatarContainerStyle , 'style'),
   maxCount: withDefault(NumberControl, 3),
   avatarSize: withDefault(NumberControl, 40),
   alignment: dropdownControl(alignOptions, "center"),
@@ -112,8 +120,8 @@ const AvatarGroupView = (props: RecordConstructorToView<typeof childrenMap> & { 
                     src={item.src ?? undefined}
                     icon={(item.AvatarIcon as ReactElement)?.props.value === '' || item.label.trim() !== '' ? undefined : item.AvatarIcon}
                     style={{
-                      color: item.color ? item.color : (props.style.fill !== '#FFFFFF' ? props.style.fill : '#FFFFFF'),
-                      backgroundColor: item.backgroundColor ? item.backgroundColor : (props.autoColor ? MacaroneList[index % MacaroneList.length] : props.style.background),
+                      color: item.color ? item.color : (props.avatar.fill !== '#FFFFFF' ? props.avatar.fill : '#FFFFFF'),
+                      backgroundColor: item.backgroundColor ? item.backgroundColor : (props.autoColor ? MacaroneList[index % MacaroneList.length] : props.avatar.background),
                     }}
                     size={props.avatarSize}
                     onClick={() => {
@@ -134,7 +142,9 @@ const AvatarGroupView = (props: RecordConstructorToView<typeof childrenMap> & { 
 };
 
 let AvatarGroupBasicComp = (function () {
-  return new UICompBuilder(childrenMap, (props, dispatch) => <AvatarGroupView {...props} dispatch={dispatch} />)
+  return new UICompBuilder(childrenMap, (props, dispatch) => {
+    return( <AvatarGroupView {...props} dispatch={dispatch} />
+)}) 
     .setPropertyViewFn((children) => (
       <>
         {["logic", "both"].includes(useContext(EditorContext).editorModeStatus) && (
@@ -163,9 +173,14 @@ let AvatarGroupBasicComp = (function () {
         )}
 
         {["layout", "both"].includes(useContext(EditorContext).editorModeStatus) && (
+          <>
+          <Section name={sectionNames.avatarStyle}>
+            {children.avatar.getPropertyView()}
+          </Section>
           <Section name={sectionNames.style}>
             {children.style.getPropertyView()}
           </Section>
+          </>
         )}
       </>
     ))

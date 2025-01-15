@@ -33,6 +33,7 @@ import { i18nObjs } from "../../i18n/index";
 import { DatasourceInfo, HttpConfig } from "api/datasourceApi";
 import { enObj } from "i18n/locales";
 import { QUICK_REST_API_ID } from "constants/datasourceConstants";
+import React from "react";
 
 const tourSteps: Step[] = [
   {
@@ -111,14 +112,23 @@ const tourSteps: Step[] = [
   },
 ];
 
-function addTable(editorState: EditorState) {
+async function addTable(editorState: EditorState) {
   const tableCompName = "table1";
   const compType = "table";
   if (editorState.getUICompByName(tableCompName)) {
     return;
   }
   const key = genRandomKey();
-  const defaultDataFn = uiCompRegistry[compType as UICompType]?.defaultDataFn;
+  const {
+    defaultDataFnName,
+    defaultDataFnPath,
+  } = uiCompRegistry[compType as UICompType];
+
+  let defaultDataFn = undefined;
+  if(defaultDataFnName && defaultDataFnPath) {
+    const module = await import(`../../comps/${defaultDataFnPath}.tsx`);
+    defaultDataFn = module[defaultDataFnName];
+  }
   const widgetValue: GridItemDataType = {
     compType,
     name: tableCompName,
@@ -183,7 +193,7 @@ function addQuery(editorState: EditorState, datasourceInfos: DatasourceInfo[]) {
         name: queryName,
         compType: "restApi",
         comp: {
-          path: i18nObjs.editorTutorials.mockDataUrl || enObj.editorTutorials.mockDataUrl,
+          path: i18nObjs.editorTutorials.mockDataUrl,
           bodyType: "application/json",
         },
         datasourceId: QUICK_REST_API_ID,
@@ -194,7 +204,7 @@ function addQuery(editorState: EditorState, datasourceInfos: DatasourceInfo[]) {
     editorState.setSelectedBottomRes(queryName, BottomResTypeEnum.Query);
 }
 
-export default function EditorTutorials() {
+function EditorTutorials() {
   const [run, setRun] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const editorState = useContext(EditorContext);
@@ -300,3 +310,5 @@ export default function EditorTutorials() {
     />
   );
 }
+
+export default React.memo(EditorTutorials);

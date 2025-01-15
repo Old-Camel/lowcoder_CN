@@ -3,12 +3,13 @@ import { AuthSearchParams } from "constants/authConstants";
 import { CommonTextLabel } from "components/Label";
 import { trans } from "i18n";
 import { ThirdPartyAuth } from "pages/userAuth/thirdParty/thirdPartyAuth";
-import FormLogin from "@lowcoder-ee/pages/userAuth/formLogin";
+import FormLogin from "@lowcoder-ee/pages/userAuth/formLoginAdmin";
 import { AuthContainer } from "pages/userAuth/authComponents";
 import React, { useContext, useMemo } from "react";
 import { AuthContext, getLoginTitle } from "pages/userAuth/authUtils";
 import styled from "styled-components";
 import { requiresUnAuth } from "pages/userAuth/authHOC";
+import FormLoginSteps from "./formLoginSteps";
 
 const ThirdAuthWrapper = styled.div`
   display: flex;
@@ -59,6 +60,7 @@ const ThirdAuthWrapper = styled.div`
   }
 `;
 
+// this is used to bind multiple third party logins to an sngle account
 const thirdPartyLoginLabel = (name: string) => trans("userAuth.signInLabel", { name: name });
 
 export const ThirdPartyBindCard = () => {
@@ -80,12 +82,13 @@ export const ThirdPartyBindCard = () => {
   );
 };
 
+// this is the classic Sign In
 function Login() {
   const { inviteInfo, systemConfig, thirdPartyAuthError } = useContext(AuthContext);
   const invitationId = inviteInfo?.invitationId;
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const orgId = useParams<any>().orgId;
+  const { orgId } = useParams<{orgId?: string}>();
 
   const loginType = systemConfig?.authConfigs.find(
     (config) => config.sourceType === queryParams.get(AuthSearchParams.loginType)
@@ -122,6 +125,7 @@ function Login() {
   );
 
   let loginCardView;
+
   if (loginType) {
     loginCardView = thirdPartyLoginView;
     // Specify the login type with query param
@@ -131,16 +135,18 @@ function Login() {
     loginCardView = thirdPartyLoginView;
   }
 
-  const loginHeading = getLoginTitle(inviteInfo?.createUserName, systemConfig?.branding?.brandName)
-  const loginSubHeading = '' // REACT_APP_LOWCODER_CUSTOM_AUTH_WELCOME_TEXT !== "" ? trans("userAuth.poweredByLowcoder") : ''
+  const loginHeading = getLoginTitle(inviteInfo?.createUserName)
+  const loginSubHeading = trans("userAuth.poweredByLowcoder");
 
   return (
-    <AuthContainer
-      heading={loginHeading}
-      subHeading={loginSubHeading}
-    >
-      <FormLogin organizationId={organizationId} />
-    </AuthContainer>
+    <>
+      <AuthContainer
+        heading={loginHeading}
+        subHeading={loginSubHeading}
+      >
+        <FormLoginSteps organizationId={organizationId} />
+      </AuthContainer>
+    </>
   );
 }
 

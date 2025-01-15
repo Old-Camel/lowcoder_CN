@@ -21,6 +21,7 @@ import { EditorContext } from "@lowcoder-ee/comps/editorState";
 import { HeaderStartDropdown } from "./headerStartDropdown";
 import { useParams } from "react-router";
 import { AppPathParams } from "constants/applicationConstants";
+import React from "react";
 
 const HeaderFont = styled.div<{ $bgColor: string }>`
   font-weight: 500;
@@ -137,9 +138,10 @@ export function HeaderProfile(props: { user: User, allowClick: boolean }) {
   );
 }
 
-export const PreviewHeader = () => {
-  const editorState = useContext(EditorContext);
-  const params = useParams<AppPathParams>();
+const PreviewHeaderComp = () => {
+    const editorState = useContext(EditorContext);
+
+    const params = useParams<AppPathParams>();
   const user = useSelector(getUser);
   const application = useSelector(currentApplication);
   const applicationId = useApplicationId();
@@ -217,3 +219,5 @@ export const PreviewHeader = () => {
     />
   );
 };
+
+export const PreviewHeader = React.memo(PreviewHeaderComp);

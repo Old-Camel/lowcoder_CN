@@ -1,4 +1,5 @@
-import { NPM_PLUGIN_ASSETS_BASE_URL } from "constants/npmPlugins";
+import { sdkConfig } from "@lowcoder-ee/constants/sdkConfig";
+import { ASSETS_BASE_URL, NPM_PLUGIN_ASSETS_BASE_URL } from "constants/npmPlugins";
 import { trans } from "i18n";
 import { CompConstructor } from "lowcoder-core";
 import {
@@ -8,18 +9,29 @@ import {
 } from "types/remoteComp";
 
 async function npmLoader(
-  remoteInfo: RemoteCompInfo
+  {
+    appId,
+    ...remoteInfo
+  }: RemoteCompInfo & {appId?: string}
 ): Promise<CompConstructor | null> {
 
-  console.log("remoteInfo: ", remoteInfo);
-
   // Falk: removed "packageVersion = "latest" as default value fir packageVersion - to ensure no automatic version jumping.
-
   const localPackageVersion = remoteInfo.packageVersion || "latest";
   const { packageName, packageVersion, compName } = remoteInfo;
-  const entry = `${NPM_PLUGIN_ASSETS_BASE_URL}/${packageName}@${localPackageVersion}/index.js`;
+
+  const pluginBaseUrl = REACT_APP_BUNDLE_TYPE === 'sdk' && sdkConfig.baseURL
+    ? `${sdkConfig.baseURL}/${ASSETS_BASE_URL}`
+    : NPM_PLUGIN_ASSETS_BASE_URL;
+
+  const entry = `${pluginBaseUrl}/${appId || 'none'}/${packageName}@${localPackageVersion}/index.js`;
+
   try {
-    const module = await import(/* webpackIgnore: true */ entry);
+    const module = await import(
+      /* @vite-ignore */
+      /* webpackIgnore: true */
+      entry
+    );
+    // console.log("Entry 1", module);
     const comp = module.default?.[compName];
     if (!comp) {
       throw new Error(trans("npm.compNotFound", { compName }));
@@ -36,15 +48,19 @@ async function bundleLoader(
 ): Promise<CompConstructor | null> {
   const { packageName, packageVersion = "latest", compName } = remoteInfo;
   const entry = `/${packageName}/${packageVersion}/index.js?v=${REACT_APP_COMMIT_ID}`;
-  const module = await import(/* webpackIgnore: true */ entry);
-  const comp = module.default?.[compName];
+  const module = await import(
+    /* @vite-ignore */
+    /* webpackIgnore: true */
+    entry
+  );
+  const comp = module?.default?.[compName];
   if (!comp) {
     throw new Error(trans("npm.compNotFound", { compName }));
   }
   return comp;
 }
 
-export const loaders: Record<RemoteCompSource, RemoteCompLoader> = {
+export const loaders: Record<RemoteCompSource, RemoteCompLoader<RemoteCompInfo & {appId?: string}>> = {
   npm: npmLoader,
   bundle: bundleLoader,
 };

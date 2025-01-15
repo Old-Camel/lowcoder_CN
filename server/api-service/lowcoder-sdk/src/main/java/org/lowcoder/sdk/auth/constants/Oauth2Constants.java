@@ -17,7 +17,7 @@ public class Oauth2Constants {
             + "&client_id=" + CLIENT_ID_PLACEHOLDER
             + "&redirect_uri=" + REDIRECT_URL_PLACEHOLDER
             + "&state=" + STATE_PLACEHOLDER
-            + "&scope=";
+            + "&scope=user";
 
     public static final String FEISHU_AUTHORIZE_URL = "https://open.feishu.cn/open-apis/authen/v1/index?"
             + "redirect_uri=" + REDIRECT_URL_PLACEHOLDER
@@ -54,4 +54,12 @@ public class Oauth2Constants {
             + "&redirect_uri=" + REDIRECT_URL_PLACEHOLDER
             + "&state=" + STATE_PLACEHOLDER
             + "&scope=" + SCOPE_PLACEHOLDER;
+
+    public static final String GENERIC_AUTHORIZE_URL = BASE_URL_PLACEHOLDER
+            + "?response_type=code"
+            + "&client_id=" + CLIENT_ID_PLACEHOLDER
+            + "&redirect_uri=" + REDIRECT_URL_PLACEHOLDER
+            + "&state=" + STATE_PLACEHOLDER
+            + "&scope=" + SCOPE_PLACEHOLDER
+            + "&access_type=offline";
 }

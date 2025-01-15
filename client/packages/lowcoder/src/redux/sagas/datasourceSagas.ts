@@ -1,5 +1,6 @@
 import {
   EvaluationReduxAction,
+  ReduxActionErrorTypes,
   ReduxActionTypes,
   ReduxActionWithCallbacks,
 } from "constants/reduxActionConstants";
@@ -13,7 +14,7 @@ import {
 } from "redux/reduxActions/datasourceActions";
 import { validateResponse } from "api/apiUtils";
 import log from "loglevel";
-import { messageInstance } from "lowcoder-design";
+import { messageInstance } from "lowcoder-design/src/components/GlobalInstances";
 
 import { Datasource } from "@lowcoder-ee/constants/datasourceConstants";
 
@@ -33,6 +34,9 @@ export function* fetchDatasourceSaga(action: EvaluationReduxAction<FetchDatasour
   } catch (error: any) {
     log.error("fetch datasource error: ", error);
     messageInstance.error(error.message);
+    yield put({
+      type: ReduxActionErrorTypes.FETCH_DATASOURCE_ERROR,
+    });
   }
 }
 

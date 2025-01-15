@@ -1,29 +1,18 @@
 package org.lowcoder.api.usermanagement;
 
-import static org.lowcoder.sdk.exception.BizError.LAST_ADMIN_CANNOT_LEAVE_ORG;
-import static org.lowcoder.sdk.exception.BizError.UNSUPPORTED_OPERATION;
-import static org.lowcoder.sdk.util.ExceptionUtils.deferredError;
-import static org.lowcoder.sdk.util.ExceptionUtils.ofError;
-import static org.lowcoder.sdk.util.StreamUtils.collectSet;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.lowcoder.api.authentication.dto.OrganizationDomainCheckResult;
 import org.lowcoder.api.bizthreshold.AbstractBizThresholdChecker;
 import org.lowcoder.api.config.ConfigView;
 import org.lowcoder.api.home.SessionUserService;
 import org.lowcoder.api.usermanagement.view.OrgMemberListView;
+import org.lowcoder.api.usermanagement.view.OrgMemberListView.OrgMemberView;
 import org.lowcoder.api.usermanagement.view.OrgView;
 import org.lowcoder.api.usermanagement.view.UpdateOrgRequest;
 import org.lowcoder.api.usermanagement.view.UpdateRoleRequest;
-import org.lowcoder.api.usermanagement.view.OrgMemberListView.OrgMemberView;
 import org.lowcoder.domain.authentication.AuthenticationService;
 import org.lowcoder.domain.authentication.FindAuthConfig;
 import org.lowcoder.domain.group.service.GroupService;
@@ -31,8 +20,8 @@ import org.lowcoder.domain.organization.event.OrgMemberLeftEvent;
 import org.lowcoder.domain.organization.model.MemberRole;
 import org.lowcoder.domain.organization.model.OrgMember;
 import org.lowcoder.domain.organization.model.Organization;
-import org.lowcoder.domain.organization.model.OrganizationDomain;
 import org.lowcoder.domain.organization.model.Organization.OrganizationCommonSettings;
+import org.lowcoder.domain.organization.model.OrganizationDomain;
 import org.lowcoder.domain.organization.service.OrgMemberService;
 import org.lowcoder.domain.organization.service.OrganizationService;
 import org.lowcoder.domain.user.model.Connection;
@@ -50,9 +39,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.stereotype.Service;
-
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.lowcoder.sdk.exception.BizError.LAST_ADMIN_CANNOT_LEAVE_ORG;
+import static org.lowcoder.sdk.exception.BizError.UNSUPPORTED_OPERATION;
+import static org.lowcoder.sdk.util.ExceptionUtils.deferredError;
+import static org.lowcoder.sdk.util.ExceptionUtils.ofError;
+import static org.lowcoder.sdk.util.StreamUtils.collectSet;
 
 @Slf4j
 @Service
@@ -89,7 +85,7 @@ public class OrgApiServiceImpl implements OrgApiService {
     }
 
     private Mono<OrgMemberListView> getOrgMemberListView(String orgId, int page, int count) {
-        return orgMemberService.getOrganizationMembers(orgId, page, count)
+        return orgMemberService.getOrganizationMembers(orgId)
                 .collectList()
                 .flatMap(orgMembers -> {
                     List<String> userIds = orgMembers.stream()
@@ -97,7 +93,8 @@ public class OrgApiServiceImpl implements OrgApiService {
                             .collect(Collectors.toList());
                     Mono<Map<String, User>> users = userService.getByIds(userIds);
 
-                    return users.map(map -> orgMembers.stream()
+                    return users.map(map -> {
+                        var list = orgMembers.stream()
                             .map(orgMember -> {
                                 User user = map.get(orgMember.getUserId());
                                 if (user == null) {
@@ -107,15 +104,22 @@ public class OrgApiServiceImpl implements OrgApiService {
                                 return build(user, orgMember);
                             })
                             .filter(Objects::nonNull)
-                            .collect(Collectors.toList())
-                    );
+                            .collect(Collectors.toList());
+                        var pageTotal = list.size();
+                        list = list.subList((page - 1) * count, count == 0 ? pageTotal : Math.min(page * count, pageTotal));
+                        return Pair.of(list, pageTotal);
+                    });
                 })
                 .zipWith(sessionUserService.getVisitorOrgMemberCache())
                 .map(tuple -> {
-                    List<OrgMemberView> orgMemberViews = tuple.getT1();
+                    List<OrgMemberView> orgMemberViews = tuple.getT1().getLeft();
+                    var pageTotal = tuple.getT1().getRight();
                     OrgMember orgMember = tuple.getT2();
                     return OrgMemberListView.builder()
                             .members(orgMemberViews)
+                            .total(pageTotal)
+                            .pageNum(page)
+                            .pageSize(count)
                             .visitorRole(orgMember.getRole().getValue())
                             .build();
                 });
@@ -157,7 +161,7 @@ public class OrgApiServiceImpl implements OrgApiService {
     private Mono<OrgMember> checkVisitorAdminRole(String orgId) {
         return sessionUserService.getVisitorId()
                 .flatMap(visitor -> orgMemberService.getOrgMember(orgId, visitor))
-                .filter(it -> it.getRole() == MemberRole.ADMIN)
+                .filter(it -> it.getRole() == MemberRole.ADMIN || it.getRole() == MemberRole.SUPER_ADMIN)
                 .switchIfEmpty(deferredError(BizError.NOT_AUTHORIZED, "NOT_AUTHORIZED"));
     }
 
@@ -270,7 +274,7 @@ public class OrgApiServiceImpl implements OrgApiService {
         return sessionUserService.getVisitorId()
                 .delayUntil(userId -> bizThresholdChecker.checkMaxOrgCount(userId))
                 .delayUntil(__ -> checkIfSaasMode())
-                .flatMap(userId -> organizationService.create(organization, userId))
+                .flatMap(userId -> organizationService.create(organization, userId, false))
                 .map(OrgView::new);
     }
 

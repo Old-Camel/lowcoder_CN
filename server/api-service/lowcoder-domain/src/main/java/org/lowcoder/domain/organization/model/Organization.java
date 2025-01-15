@@ -1,14 +1,12 @@
 package org.lowcoder.domain.organization.model;
 
-import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
-import static org.lowcoder.infra.util.AssetUtils.toAssetPath;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.lowcoder.domain.mongodb.AfterMongodbRead;
@@ -18,21 +16,26 @@ import org.lowcoder.sdk.auth.AbstractAuthConfig;
 import org.lowcoder.sdk.models.HasIdAndAuditing;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.*;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
+import static org.lowcoder.infra.util.AssetUtils.toAssetPath;
 
 
 @Getter
 @Setter
 @NoArgsConstructor
 @Document
+@Jacksonized
+@SuperBuilder
 public class Organization extends HasIdAndAuditing implements BeforeMongodbWrite, AfterMongodbRead {
 
     private static final OrganizationCommonSettings EMPTY_SETTINGS = new OrganizationCommonSettings();
+    @Getter
+    private String gid;
+
+    private String slug;
 
     private String name;
 
@@ -43,6 +46,13 @@ public class Organization extends HasIdAndAuditing implements BeforeMongodbWrite
     private String contactEmail;
 
     private String contactPhoneNumber;
+
+    private Boolean isEmailDisabled;
+
+    public Boolean getIsEmailDisabled() {
+        if(isEmailDisabled == null) return false;
+        else return isEmailDisabled;
+    }
 
     @JsonIgnore
     private String logoAssetId;
@@ -84,11 +94,24 @@ public class Organization extends HasIdAndAuditing implements BeforeMongodbWrite
     }
 
     public static class OrganizationCommonSettings extends HashMap<String, Object> {
-        public static final String USER_EXTRA_TRANSFORMER = "userExtraTransformer";
-        public static final String USER_EXTRA_TRANSFORMER_UPDATE_TIME = "userExtraTransformer_updateTime";
+        public static final String PASSWORD_RESET_EMAIL_TEMPLATE = "PASSWORD_RESET_EMAIL_TEMPLATE";
 
-        // custom branding configs
-        public static final String CUSTOM_BRANDING_KEY = "branding";
+        /**
+         * Settings excluded from sanitized export
+         */
+        private final Set<String> excludedKeys = Set.of(
+            PASSWORD_RESET_EMAIL_TEMPLATE
+        );
+        public OrganizationCommonSettings sanitized() {
+            OrganizationCommonSettings sanitized = new OrganizationCommonSettings();
+            if (isEmpty()) {
+                return sanitized;
+            }
+            this.entrySet().stream()
+                    .filter((entry) -> !excludedKeys.contains(entry.getKey()))
+                    .forEach((entry) -> sanitized.put(entry.getKey(), entry.getValue()));
+            return sanitized;
+        }
     }
 
     public long getCreateTime() {

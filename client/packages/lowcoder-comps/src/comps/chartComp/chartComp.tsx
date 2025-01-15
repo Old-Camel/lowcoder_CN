@@ -26,6 +26,7 @@ import {
   withViewFn,
   ThemeContext,
   chartColorPalette,
+  getPromiseAfterDispatch,
 } from "lowcoder-sdk";
 import { getEchartsLocale, trans } from "i18n/comps";
 import { ItemColorComp } from "comps/chartComp/chartConfigs/lineChartConfig";
@@ -35,6 +36,8 @@ import {
   getSelectedPoints,
 } from "comps/chartComp/chartUtils";
 import log from "loglevel";
+
+let clickEventCallback = () => {};
 
 let ChartTmpComp = (function () {
   return new UICompBuilder(chartChildrenMap, () => null)
@@ -57,8 +60,47 @@ ChartTmpComp = withViewFn(ChartTmpComp, (comp) => {
   } catch (error) {
     log.error('theme chart error: ', error);
   }
-  const onEvent = comp.children.onEvent.getView();
+
+  const triggerClickEvent = async (dispatch: any, action: CompAction<JSONValue>) => {
+    await getPromiseAfterDispatch?.(
+      dispatch,
+      action,
+      { autoHandleAfterReduce: true }
+    );
+    onEvent('click');
+  }
+
   useEffect(() => {
+    // click events for JSON/Map mode
+    if (mode === 'ui') return;
+
+    const echartsCompInstance = echartsCompRef?.current?.getEchartsInstance();
+    if (!echartsCompInstance) {
+      return _.noop;
+    }
+    echartsCompInstance?.on("click", (param: any) => {
+      document.dispatchEvent(new CustomEvent("clickEvent", {
+        bubbles: true,
+        detail: {
+          action: 'click',
+          data: param.data,
+        }
+      }));
+      triggerClickEvent(
+        comp.dispatch,
+        changeChildAction("lastInteractionData", param.data, false)
+      );
+    });
+    return () => {
+      echartsCompInstance?.off("click");
+      document.removeEventListener('clickEvent', clickEventCallback)
+    };
+  }, [mode, mapScriptLoaded]);
+
+  useEffect(() => {
+    // click events for UI mode
+    if(mode !== 'ui') return;
+
     // bind events
     const echartsCompInstance = echartsCompRef?.current?.getEchartsInstance();
     if (!echartsCompInstance) {
@@ -67,15 +109,36 @@ ChartTmpComp = withViewFn(ChartTmpComp, (comp) => {
     echartsCompInstance.on("selectchanged", (param: any) => {
       const option: any = echartsCompInstance.getOption();
       //log.log("chart select change", param);
+      // trigger click event listener
+
+      document.dispatchEvent(new CustomEvent("clickEvent", {
+        bubbles: true,
+        detail: {
+          action: param.fromAction,
+          data: getSelectedPoints(param, option)
+        }
+      }));
+
       if (param.fromAction === "select") {
+
         comp.dispatch(changeChildAction("selectedPoints", getSelectedPoints(param, option)));
         onEvent("select");
       } else if (param.fromAction === "unselect") {
         comp.dispatch(changeChildAction("selectedPoints", getSelectedPoints(param, option)));
         onEvent("unselect");
       }
+
+      triggerClickEvent(
+        comp.dispatch,
+        changeChildAction("lastInteractionData", getSelectedPoints(param, option), false)
+      );
     });
     // unbind
+    return () => {
+      echartsCompInstance?.off("selectchanged");
+      document.removeEventListener('clickEvent', clickEventCallback)
+    };
+  }, [mode, onUIEvent]);
     return () => echartsCompInstance.off("selectchanged");
   }, [onEvent]);
 
@@ -108,11 +171,13 @@ ChartTmpComp = withViewFn(ChartTmpComp, (comp) => {
         lazyUpdate
         opts={{ locale: getEchartsLocale() }}
         option={option}
-        theme={themeConfig}
+        theme={mode !== 'map' ? themeConfig : undefined}
+        mode={mode}
+
       />
     </ReactResizeDetector>
   );
-});
+
 
 function getYAxisFormatContextValue(
   data: Array<JSONObject>,
@@ -217,6 +282,14 @@ const ChartComp = withExposingConfigs(ChartTmpComp, [
     },
   }),
   depsConfig({
+    name: "lastInteractionData",
+    desc: trans("chart.lastInteractionDataDesc"),
+    depKeys: ["lastInteractionData"],
+    func: (input) => {
+      return input.lastInteractionData;
+    },
+  }),
+  depsConfig({
     name: "data",
     desc: trans("chart.dataDesc"),
     depKeys: ["data", "mode"],
@@ -231,6 +304,62 @@ const ChartComp = withExposingConfigs(ChartTmpComp, [
   }),
   new NameConfig("title", trans("chart.titleDesc")),
 ]);
+
+ChartComp = withMethodExposing(ChartComp, [
+  {
+    method: {
+      name: "getMapInstance",
+    },
+    execute: (comp) => {
+      return new Promise(resolve => {
+        let intervalCount = 0;
+        const mapInstanceInterval = setInterval(() => {
+          const instance = comp.children.mapInstance.getView();
+          const mapInstance = instance?.getModel()?.getComponent("gmap")?.getGoogleMap()
+          if(mapInstance || intervalCount === 10) {
+            clearInterval(mapInstanceInterval)
+            resolve(mapInstance)
+          }
+          intervalCount++;
+        }, 1000);
+      })
+    }
+  },
+  {
+    method: {
+      name: "getMapZoomLevel",
+    },
+    execute: (comp) => {
+      return comp.children.mapZoomLevel.getView();
+    }
+  },
+  {
+    method: {
+      name: "getMapCenterPosition",
+    },
+    execute: (comp) => {
+      return Promise.resolve({
+        lng: comp.children.mapCenterLng.getView(),
+        lat: comp.children.mapCenterLat.getView(),
+      });
+    }
+  },
+  {
+    method: {
+      name: "onClick",
+      params: [
+        {
+          name: "callback",
+          type: "function",
+        },
+      ],
+    },
+    execute: (comp, params) => {
+      clickEventCallback = params[0];
+      document.addEventListener('clickEvent', clickEventCallback);
+    }
+  },
+])
 
 export const ChartCompWithDefault = withDefault(ChartComp, {
   xAxisKey: "date",

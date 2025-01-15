@@ -8,6 +8,7 @@ import dayjs from "dayjs";
 import { default as AntdBreadcrumb } from "antd/es/breadcrumb";
 import { default as Select } from "antd/es/select";
 import { default as Skeleton } from "antd/es/skeleton";
+import { Card } from "antd";
 import React, { useEffect, useState } from "react";
 import {
   ArrowIcon,
@@ -21,7 +22,7 @@ import { canEditApp, canManageApp } from "../../util/permissionUtils";
 import { HomeResKey, HomeResTypeEnum, NavigationTypes } from "../../types/homeRes";
 import { HomeResInfo } from "../../util/homeResUtils";
 import { getUser } from "../../redux/selectors/usersSelectors";
-import { useLocation } from "react-use";
+import { useLocation } from "react-router-dom";
 import { TrashTableView } from "./TrashTableView";
 import { HomepageTourV2 } from "../tutorials/HomeTutorialsV2";
 import { HomeCardView } from "./HomeCardView";
@@ -32,10 +33,9 @@ import { CreateDropdown } from "./CreateDropdown";
 import { trans } from "../../i18n";
 import { isFetchingFolderElements } from "../../redux/selectors/folderSelector";
 import { checkIsMobile } from "util/commonUtils";
-import MarketplaceHeaderImage from "assets/images/marketplaceHeaderImage.jpg";
-import { Divider } from "antd";
-import { Margin } from "../setting/theme/styledComponents"; 
+import { default as Divider } from "antd/es/divider";
 import { ApplicationCategoriesEnum } from "constants/applicationConstants";
+import { Pagination } from 'antd';
 
 const Wrapper = styled.div`
   display: flex;
@@ -51,7 +51,7 @@ const HeaderWrapper = styled.div`
   padding: 0 36px;
   align-items: center;
   flex-shrink: 0;
-  @media screen and (max-width: 500px) {
+  @media screen and (max-width: 720px) {
     padding: 0 24px;
   }
 `;
@@ -61,28 +61,13 @@ const OperationWrapper = styled.div`
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  height: 32px;
+  height: auto;
   padding: 0 36px;
   margin: 8px 0 20px 0;
-  @media screen and (max-width: 500px) {
-    padding: 0 24px;
-  }
-`;
-
-const MarketplaceHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  height: 200px;
-  padding: 0 36px;
-  margin: 8px 0 20px 0;
-  @media screen and (max-width: 500px) {
-    padding: 0 24px;
-  }
-  > img { 
-    width: 100%;
-    object-fit: cover;
+  @media screen and (max-width: 850px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
   }
 `;
 
@@ -107,17 +92,9 @@ const Breadcrumb = styled(AntdBreadcrumb)`
     flex-direction: column;
     justify-content: center;
   }
-`;
 
-const OperationRightWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  margin-left: auto;
-  @media screen and (max-width: 500px) {
-    > Button {
-      display: none;
-    }
+  @media screen and (max-width: 720px) {
+    display:none
   }
 `;
 
@@ -217,14 +194,20 @@ const EmptyView = styled.div`
     }
   }
 `;
+const PaginationLayout = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 20px;  
+`
 
 const LayoutSwitcher = styled.div`
   position: absolute;
-  right: 36px;
-  top: 6px;
+  left: 20px;
+  top: 40px;
   cursor: pointer;
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 16px;
   border-radius: 4px;
   z-index: ${Layers.homeLayoutSwitcher};
   display: flex;
@@ -234,12 +217,43 @@ const LayoutSwitcher = styled.div`
   &:hover {
     background-color: #f5f5f6;
   }
-
-  @media screen and (max-width: 500px) {
-    display: none;
-  }
 `;
 
+const HomeView = styled.div`
+  font-size: 14px;
+  color: #8b8fa3;
+  flex-grow: 1;
+  padding-top: 0px;
+  padding-left: 40px;
+  max-width: 95%;
+`;
+
+const StyleHomeCover = styled.div`
+    background: rgb(2,0,36);
+    background: -moz-linear-gradient(121deg, rgba(2,0,36,1) 0%, rgba(23,102,167,1) 42%, rgba(243,130,244,1) 100%);
+    background: -webkit-linear-gradient(121deg, rgba(2,0,36,1) 0%, rgba(23,102,167,1) 42%, rgba(243,130,244,1) 100%);
+    background: linear-gradient(121deg, rgba(2,0,36,1) 0%, rgba(23,102,167,1) 42%, rgba(243,130,244,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#020024",endColorstr="#f382f4",GradientType=1);
+    padding: 25px;
+    height: 120px;
+    border-radius:10px 10px 0 0;
+`;
+
+const SearchWrapper = styled.div`
+  width: auto;
+
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+
+  @media screen and (max-width: 980px) {
+    width: 100%;
+    > Button {
+      display: none;
+    }
+  }
+`;
 
 function showNewUserGuide(user: User) {
   return (
@@ -278,12 +292,51 @@ export interface HomeLayoutProps {
   localMarketplaceApps?: Array<ApplicationMeta>;
   globalMarketplaceApps?: Array<ApplicationMeta>;
   mode: HomeLayoutMode;
+  setCurrentPage?: any;
+  setPageSize?: any;
+  currentPage?: number;
+  pageSize?: number;
+  total?: number;
+  searchValue?: string;
+  setSearchValue?: any;
+  setTypeFilterPagination?: any;
+  setCategoryFilterPagination?: any;
+  setIsCreated?: any;
+  isCreated?: boolean;
+  setModify?: any;
+  modify?: boolean;
 }
 
 export function HomeLayout(props: HomeLayoutProps) {
+  const { breadcrumb = [],
+    elements = [],
+    localMarketplaceApps = [],
+    globalMarketplaceApps = [],
+    mode ,
+    setCurrentPage,
+    setPageSize,
+    pageSize,
+    currentPage,
+    searchValue,
+    setSearchValue,
+    total,
+    setTypeFilterPagination,
+    setCategoryFilterPagination,
+    setModify,
+    modify,
+    setIsCreated,
+    isCreated
+
+  } = props;
 
 
-  const { breadcrumb = [], elements = [], localMarketplaceApps = [], globalMarketplaceApps = [],mode } = props;
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (current: number, size: number) => {
+    setPageSize(size);
+  };
 
   const categoryOptions = [
     { label: <FilterMenuItem>{trans("home.allCategories")}</FilterMenuItem>, value: 'All' },
@@ -302,7 +355,7 @@ export function HomeLayout(props: HomeLayoutProps) {
   const isSelfHost = window.location.host !== 'app.lowcoder.cloud';
   const [typeFilter, setTypeFilter] = useState<HomeResKey>("All");
   const [categoryFilter, setCategoryFilter] = useState<ApplicationCategoriesEnum | "All">("All");
-  const [searchValue, setSearchValue] = useState("");
+  const [visibility, setVisibility] = useState(mode === "view" || mode === "trash" || mode === "folder");
   const [layout, setLayout] = useState<HomeLayoutType>(
     checkIsMobile(window.innerWidth) ? "card" : getHomeLayout()
   );
@@ -320,7 +373,15 @@ export function HomeLayout(props: HomeLayoutProps) {
     return null;
   }
 
-  var displayElements = elements;
+  var displayElements = elements.sort((a, b) => {
+    if (a.folder && !b.folder) {
+      return -1;
+    } else if (!a.folder && b.folder) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
 
   if (mode === "marketplace" && isSelfHost) {
     const markedLocalApps = localMarketplaceApps.map(app => ({ ...app, isLocalMarketplace: true }));
@@ -332,36 +393,34 @@ export function HomeLayout(props: HomeLayoutProps) {
     const markedLocalApps = localMarketplaceApps.map(app => ({ ...app, isLocalMarketplace: true }));
     displayElements = [...markedLocalApps];
   }
-
   const resList: HomeRes[] = displayElements
-    .filter((e) =>
-      searchValue
-        ? e.name.toLocaleLowerCase().includes(searchValue) ||
-          e.createBy.toLocaleLowerCase().includes(searchValue)
-        : true
-    )
     .filter((e) => {
-      if (HomeResTypeEnum[typeFilter].valueOf() === HomeResTypeEnum.All) {
-        return true;
-      }
-      if (e.folder) {
-        return HomeResTypeEnum[typeFilter] === HomeResTypeEnum.Folder;
-      } else {
-        if (typeFilter === "Navigation") {
-          return NavigationTypes.map((t) => t.valueOf()).includes(e.applicationType);
+      if (!visibility) {
+        if (searchValue) {
+          const lowerCaseSearchValue = searchValue.toLocaleLowerCase();
+          return e.name?.toLocaleLowerCase().includes(lowerCaseSearchValue) ||
+              e.createBy?.toLocaleLowerCase().includes(lowerCaseSearchValue);
         }
-        return HomeResTypeEnum[typeFilter].valueOf() === e.applicationType;
-      }
-    })
-    .filter((e) => {
-      // If "All" is selected, do not filter out any elements based on category
-      if (categoryFilter === 'All' || !categoryFilter) {
         return true;
       }
-      // Otherwise, filter elements based on the selected category
-      return !e.folder && e.category === categoryFilter.toString();
+      return true;
     })
-    
+    .filter((e) => {
+      if(!visibility) {
+        if (HomeResTypeEnum[typeFilter].valueOf() === HomeResTypeEnum.All) {
+          return true;
+        }
+        if (e.folder) {
+          return HomeResTypeEnum[typeFilter] === HomeResTypeEnum.Folder;
+        } else {
+          if (typeFilter === "Navigation") {
+            return NavigationTypes.map((t) => t.valueOf()).includes(e.applicationType);
+          }
+          return HomeResTypeEnum[typeFilter].valueOf() === e.applicationType;
+        }
+      }
+      return true;
+      })
     .map((e) =>
       e.folder
         ? {
@@ -439,138 +498,192 @@ export function HomeLayout(props: HomeLayoutProps) {
       </HeaderWrapper>
 
       {showNewUserGuide(user) && <HomepageTourV2 />}
-      {/*<HomepageTourV2 />*/}
 
-      {mode === "marketplace" && (
-       <MarketplaceHeader><img src={MarketplaceHeaderImage} alt="Lowcoder Application Marketplace"/></MarketplaceHeader>
-      )}
+        <HomeView>
+          <StyleHomeCover>
+            <h1 style={{color: "#ffffff", marginTop : "12px"}}>
+              {mode === "marketplace" && trans("home.appMarketplace")}
+              {mode === "folders" && trans("home.allFolders")}
+              {mode === "folder" && trans("home.folder")}
+              {mode === "module" && trans("home.modules")}
+              {mode === "trash" && trans("home.trash")}
+              {mode === "view" && trans("home.allApplications")}
+            </h1>
+          </StyleHomeCover>
+          <Card style={{ marginBottom: "20px" }}>
+            
+            <OperationWrapper>
+              {mode !== "folders" && mode !== "module" && (
+                <FilterDropdown
+                  variant="borderless"
+                  value={typeFilter}
+                  onChange={(value: any) => {
+                    setTypeFilter(value as HomeResKey);
+                    if(visibility)
+                      setTypeFilterPagination(HomeResTypeEnum[value])
+                  }
+                  }
+                  options={[
+                    getFilterMenuItem(HomeResTypeEnum.All),
+                    getFilterMenuItem(HomeResTypeEnum.Application),
+                    getFilterMenuItem(HomeResTypeEnum.Module),
+                    ...(mode !== "marketplace" ? [getFilterMenuItem(HomeResTypeEnum.Navigation), getFilterMenuItem(HomeResTypeEnum.MobileTabLayout)] : []),
+                    ...(mode !== "trash" && mode !== "marketplace" && mode !== "folder" ? [getFilterMenuItem(HomeResTypeEnum.Folder)] : []),
+                  ]}
+                  getPopupContainer={(node: any) => node}
+                  suffixIcon={<ArrowSolidIcon />} />
+              )}
+              {(mode === "view" || mode === "folder") &&
+                <FilterDropdown
+                    style={{ minWidth: "220px" }}
+                    variant="borderless"
+                    value={categoryFilter}
+                    onChange={(value: any) => {
+                      setCategoryFilter(value as ApplicationCategoriesEnum)
+                      setCategoryFilterPagination(value as ApplicationCategoriesEnum);
+                      }
 
-      <OperationWrapper>
-        {mode !== "folders" && mode !== "module" && (
-          <FilterDropdown
-            variant="borderless"
-            value={typeFilter}
-            onChange={(value: any) => setTypeFilter(value as HomeResKey)}
-            options={[
-              getFilterMenuItem(HomeResTypeEnum.All),
-              getFilterMenuItem(HomeResTypeEnum.Application),
-              getFilterMenuItem(HomeResTypeEnum.Module),
-              ...(mode !== "marketplace" ? [getFilterMenuItem(HomeResTypeEnum.Navigation)] : []),
-              ...(mode !== "trash" && mode !== "marketplace" ? [getFilterMenuItem(HomeResTypeEnum.Folder)] : []),
-            ]}
-            getPopupContainer={(node: any) => node}
-            suffixIcon={<ArrowSolidIcon />} />
-        )}
-        {mode === "marketplace" && (
-          <FilterDropdown
-            style={{ minWidth: "220px" }}
-            variant="borderless"
-            value={categoryFilter}
-            onChange={(value: any) => setCategoryFilter(value as ApplicationCategoriesEnum)}
-            options={categoryOptions}
-            // getPopupContainer={(node) => node}
-            suffixIcon={<ArrowSolidIcon />} />
-        )}
+                    }
+                    options={categoryOptions}
+                  // getPopupContainer={(node) => node}
+                    suffixIcon={<ArrowSolidIcon />}
+                />}
+              {mode === "marketplace" && (
+                <FilterDropdown
+                  style={{ minWidth: "220px" }}
+                  variant="borderless"
+                  value={categoryFilter}
+                  onChange={(value: any) => setCategoryFilter(value as ApplicationCategoriesEnum)}
+                  options={categoryOptions}
+                  // getPopupContainer={(node) => node}
+                  suffixIcon={<ArrowSolidIcon />} />
+              )}
 
-        <OperationRightWrapper>
-          <Search
-            placeholder={trans("search")}
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            style={{ width: "192px", height: "32px", margin: "0" }}
-          />
-          {mode !== "trash" && mode !== "marketplace" && user.orgDev && (
-            <CreateDropdown defaultVisible={showNewUserGuide(user)} mode={mode} />
-          )}
-        </OperationRightWrapper>
-      </OperationWrapper>
+              <LayoutSwitcher onClick={() => setLayout(layout === "list" ? "card" : "list")}>
+                {layout === "list" ? <HomeCardIcon/> : <HomeListIcon/>}
+              </LayoutSwitcher>
 
-      <ContentWrapper>
+              <SearchWrapper>
+                <Search
+                  placeholder={trans("search")}
+                  value={searchValue || ""}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  style={{ width: "192px", height: "32px", margin: "0" }}
+                />
+              
 
-        {isFetching && resList.length === 0 ? (
-          <SkeletonStyle active paragraph={{ rows: 8, width: 648 }} title={false} />
-        ) : (
-          <>
-            {resList.length > 0 ? (
-              <>
-                {mode === "trash" ? (
-                  <TrashTableView resources={resList} />
-                ) : (
-                  <>
-                    <LayoutSwitcher onClick={() => setLayout(layout === "list" ? "card" : "list")}>
-                      {layout === "list" ? <HomeCardIcon /> : <HomeListIcon />}
-                    </LayoutSwitcher>
-                  
-                    {mode === "marketplace" && (
-                      <>
-                        {layout === "list" ? (
-                          <>
-                            {isSelfHost ? (
-                              <>
-                                <h2 style={{ padding: "0 36px" }}>{trans("home.localMarketplaceTitle")}</h2>
-                                <HomeTableView resources={resList.filter(app => app.isLocalMarketplace)} />
-                                <Divider style={{ padding: "0 36px", margin: "0 36px", width: "calc(100% - 72px) !important" }} />
-                                <h2 style={{ padding: "0 36px" }}>{trans("home.globalMarketplaceTitle")}</h2>
-                                <HomeTableView resources={resList.filter(app => !app.isLocalMarketplace)} />
-                              </>
-                            ) : (
-                              <>
-                                <h2 style={{padding: "0 36px"}}>{trans("home.globalMarketplaceTitle")}</h2>
-                                <HomeTableView resources={resList.filter(app => app.isLocalMarketplace)} />
-                              </> 
-                            )}
-                          </>
-                        ) : (
+              {mode !== "trash" && mode !== "marketplace" && user.orgDev && (
+                <CreateDropdown 
+                  defaultVisible={showNewUserGuide(user)} 
+                  mode={mode} 
+                  setModify={setIsCreated} 
+                  modify={isCreated!} />
+              )}
+              </SearchWrapper>
+
+            </OperationWrapper>
+
+            <Divider />
+
+            <ContentWrapper>
+
+              {isFetching && resList.length === 0 ? (
+                <SkeletonStyle active paragraph={{ rows: 8, width: 648 }} title={false} />
+              ) : (
+                <>
+                  {resList.length > 0 ? (
+                    <>
+                      {mode === "trash" ? (
+                        <TrashTableView resources={resList} setModify={setModify} modify={modify!}/>
+                      ) : (
+                        <>
+                          
+                          {mode === "marketplace" && (
                             <>
-                            {isSelfHost ? (
-                              <>
-                                <h2 style={{padding: "0 36px"}}>{trans("home.localMarketplaceTitle")}</h2>
-                                <HomeCardView resources={resList.filter(app => app.isLocalMarketplace)} />
-                                <Divider style={{padding: "0 36px", margin: "12px 36px", width: "calc(100% - 72px) !important"}}/>
-                                <h2 style={{padding: "0 36px"}}>{trans("home.globalMarketplaceTitle")}</h2>
-                                <HomeCardView resources={resList.filter(app => !app.isLocalMarketplace)} />
-                              </>
-                            ) : (
-                              <>
-                                <h2 style={{padding: "0 36px"}}>{trans("home.globalMarketplaceTitle")}</h2>
-                                <HomeCardView resources={resList.filter(app => app.isLocalMarketplace)} />
-                              </>
-                            )}
-                          </>
-                        )}
-                      </>
-                    )}
-                    {mode !== "marketplace" && (
-                      <>
-                        {layout === "list" ? (
-                          <HomeTableView resources={resList} />
-                        ) : (
-                          <HomeCardView resources={resList} />
-                        )}
-                      </>
-                    )}
+                              {layout === "list" ? (
+                                <>
+                                  {isSelfHost ? (
+                                    <>
+                                      <h2 style={{ padding: "0 36px" }}>{trans("home.localMarketplaceTitle")}</h2>
+                                      <HomeTableView resources={resList.filter(app => app.isLocalMarketplace)} />
+                                      <Divider style={{ padding: "0 36px", margin: "0 36px", width: "calc(100% - 72px) !important" }} />
+                                      <h2 style={{ padding: "0 36px" }}>{trans("home.globalMarketplaceTitle")}</h2>
+                                      <HomeTableView resources={resList.filter(app => !app.isLocalMarketplace)} />
+                                    </>
+                                  ) : (
+                                    <>
+                                      <h2 style={{padding: "0 36px"}}>{trans("home.globalMarketplaceTitle")}</h2>
+                                      <HomeTableView resources={resList.filter(app => app.isLocalMarketplace)} />
+                                    </> 
+                                  )}
+                                </>
+                              ) : (
+                                  <>
+                                  {isSelfHost ? (
+                                    <>
+                                      <h2 style={{padding: "0 36px"}}>{trans("home.localMarketplaceTitle")}</h2>
+                                      <HomeCardView resources={resList.filter(app => app.isLocalMarketplace)} />
+                                      <Divider style={{padding: "0 36px", margin: "12px 36px", width: "calc(100% - 72px) !important"}}/>
+                                      <h2 style={{padding: "0 36px"}}>{trans("home.globalMarketplaceTitle")}</h2>
+                                      <HomeCardView resources={resList.filter(app => !app.isLocalMarketplace)} />
+                                    </>
+                                  ) : (
+                                    <>
+                                      <h2 style={{padding: "0 36px"}}>{trans("home.globalMarketplaceTitle")}</h2>
+                                      <HomeCardView resources={resList.filter(app => app.isLocalMarketplace)} />
+                                    </>
+                                  )}
+                                </>
+                              )}
+                            </>
+                          )}
+                          {mode !== "marketplace" && (
+                            <>
+                              {layout === "list" ? (
+                                <HomeTableView resources={resList} setModify={setModify} modify={modify!} mode={mode}/>
+                              ) : (
+                                <HomeCardView resources={resList} setModify={setModify} modify={modify!} mode={mode} />
+                              )}
+                            </>
+                          )}
 
-                  </>
-                )}
-              </>
-            ) : (
-              <EmptyView>
-                <HomeEmptyIcon style={{ width: "90px", height: "120px" }} />
-                <div style={{ marginBottom: "16px" }}>
-                  {mode === "trash"
-                    ? trans("home.trashEmpty")
-                    : mode === "marketplace"
-                    ? trans("home.noMarketplaceApps")
-                    : user.orgDev
-                    ? trans("home.projectEmptyCanAdd")
-                    : trans("home.projectEmpty")}
-                </div>
-                {mode !== "trash" && mode !== "marketplace" && user.orgDev && <CreateDropdown mode={mode} />}
-              </EmptyView>
-            )}
-          </>
-        )}
-      </ContentWrapper>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <EmptyView>
+                      <HomeEmptyIcon style={{ width: "90px", height: "120px" }} />
+                      <div style={{ marginBottom: "16px" }}>
+                        {mode === "trash"
+                          ? trans("home.trashEmpty")
+                          : mode === "marketplace"
+                          ? trans("home.noMarketplaceApps")
+                          : user.orgDev
+                          ? trans("home.projectEmptyCanAdd")
+                          : trans("home.projectEmpty")}
+                      </div>
+                      {mode !== "trash" && mode !== "marketplace" && user.orgDev && <CreateDropdown mode={mode} setModify={setIsCreated} modify={isCreated!}/>}
+                    </EmptyView>
+                  )}
+                </>
+              )}
+            </ContentWrapper>
+            {visibility && resList.length ? <div>
+              <PaginationLayout>
+                <Pagination
+                    current={currentPage}
+                    pageSize={pageSize}
+                    onChange={handlePageChange}
+                    onShowSizeChange={handlePageSizeChange}
+                    total={total}
+                    showSizeChanger
+                />
+              </PaginationLayout>
+            </div> : null}
+          </Card>  
+          
+        </HomeView>
+      
     </Wrapper>
   );
 }

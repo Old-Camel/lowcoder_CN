@@ -7,11 +7,13 @@ import ApplicationApi from "@lowcoder-ee/api/applicationApi";
 import { ApplicationMeta } from "@lowcoder-ee/constants/applicationConstants";
 import { GenericApiResponse } from "@lowcoder-ee/api/apiResponses";
 import { validateResponse } from "@lowcoder-ee/api/apiUtils";
-import { messageInstance } from "lowcoder-design";
+import { messageInstance } from "lowcoder-design/src/components/GlobalInstances";
+import { Helmet } from "react-helmet";
 
 export function MarketplaceView() {
   const [ marketplaceApps, setMarketplaceApps ] = useState<Array<ApplicationMeta>>([]);
   const [ localMarketplaceApps, setLocalMarketplaceApps ] = useState<Array<ApplicationMeta>>([]);
+  const [searchValue, setSearchValue] = useState("");
 
   const fetchMarketplaceApps = async () => {
     try {
@@ -52,12 +54,17 @@ export function MarketplaceView() {
   }, []);
 
   return (
-    <HomeLayout
-      elements={[]}
-      localMarketplaceApps={localMarketplaceApps}
-      globalMarketplaceApps={marketplaceApps}
-      breadcrumb={[{ text: trans("home.marketplace"), path: MARKETPLACE_URL }]}
-      mode={"marketplace"}
-    />
+    <>
+      <Helmet>{<title>{trans("home.marketplace")}</title>}</Helmet>
+      <HomeLayout
+        elements={[]}
+        localMarketplaceApps={localMarketplaceApps}
+        globalMarketplaceApps={marketplaceApps}
+        breadcrumb={[{ text: trans("home.marketplace"), path: MARKETPLACE_URL }]}
+        mode={"marketplace"}
+        searchValue={searchValue}
+        setSearchValue={setSearchValue}
+      />
+    </>
   );
 };

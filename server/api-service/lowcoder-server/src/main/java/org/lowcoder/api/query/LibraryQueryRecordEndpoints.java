@@ -5,6 +5,7 @@ import static org.lowcoder.infra.constant.NewUrl.LIBRARY_QUERY_RECORD_URL;
 import java.util.List;
 import java.util.Map;
 
+import org.lowcoder.api.framework.view.PageResponseView;
 import org.lowcoder.api.framework.view.ResponseView;
 import org.lowcoder.api.query.view.LibraryQueryRecordMetaView;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,7 +25,7 @@ public interface LibraryQueryRecordEndpoints
 	public static final String TAG_LIBRARY_QUERY_RECORDS = "Library Queries Record APIs";
 
 	@Operation(
-			tags = LIBRARY_QUERY_RECORD_URL,
+			tags = TAG_LIBRARY_QUERY_RECORDS,
 		    operationId = "deleteLibrartQueryRecord",
 		    summary = "Delete Library Query Record",
 		    description = "Permanently remove a specific Library Query Record from Lowcoder using its unique record ID."
@@ -33,16 +34,18 @@ public interface LibraryQueryRecordEndpoints
     public Mono<Void> delete(@PathVariable String libraryQueryRecordId);
 
 	@Operation(
-			tags = LIBRARY_QUERY_RECORD_URL,
+			tags = TAG_LIBRARY_QUERY_RECORDS,
 		    operationId = "getLibraryQueryRecord",
 		    summary = "Get Library Query Record",
 		    description = "Retrieve a specific Library Query Record within Lowcoder using the associated library query ID."
 	)
     @GetMapping("/listByLibraryQueryId")
-    public Mono<ResponseView<List<LibraryQueryRecordMetaView>>> getByLibraryQueryId(@RequestParam(name = "libraryQueryId") String libraryQueryId);
+    public Mono<PageResponseView<?>> getByLibraryQueryId(@RequestParam(name = "libraryQueryId") String libraryQueryId,
+														 @RequestParam(required = false, defaultValue = "1") int pageNum,
+														 @RequestParam(required = false, defaultValue = "100") int pageSize);
 
 	@Operation(
-			tags = LIBRARY_QUERY_RECORD_URL,
+			tags = TAG_LIBRARY_QUERY_RECORDS,
 		    operationId = "listLibraryQueryRecords",
 		    summary = "Get Library Query Records",
 		    description = "Retrieve a list of Library Query Records, which store information related to executed queries within Lowcoder and the current Organization / Workspace by the impersonated User"

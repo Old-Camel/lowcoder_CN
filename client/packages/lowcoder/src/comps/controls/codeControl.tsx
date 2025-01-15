@@ -1,13 +1,13 @@
-import { EditorState } from "@codemirror/state";
+import type { EditorState } from "@codemirror/state";
 import { isThemeColorKey } from "api/commonSettingApi";
-import { CodeEditor } from "base/codeEditor";
-import { Language } from "base/codeEditor/codeEditorTypes";
+import type { Language } from "base/codeEditor/codeEditorTypes";
 import { EditorContext } from "comps/editorState";
 import { withDefault } from "comps/generators/simpleGenerators";
 import { CompExposingContext } from "comps/generators/withContext";
 import { exposingDataForAutoComplete } from "comps/utils/exposingTypes";
 import { trans } from "i18n";
 import _ from "lodash";
+import { debounce, trimStart } from "lodash";
 import {
   AbstractComp,
   changeDependName,
@@ -28,14 +28,15 @@ import {
 import {
   ControlPropertyViewWrapper,
   isValidColor,
+  isValidGradient,
   toHex,
   wrapperToControlItem,
 } from "lowcoder-design";
-import { ReactNode } from "react";
+import { CSSProperties, lazy, ReactNode, Suspense } from "react";
 import {
   showTransform,
   toArrayJSONObject,
-  toBoolean,
+  toBoolean, toBooleanOrCss, toBooleanOrJsonObject,
   toJSONArray,
   toJSONObject,
   toJSONObjectArray,
@@ -54,6 +55,11 @@ import { JSONObject, JSONValue } from "util/jsonTypes";
 import { setFieldsNoTypeCheck, shallowEqual, toType } from "util/objectUtils";
 import { toReadableString } from "util/stringUtils";
 import { ControlLayout, ControlParams } from "./controlParams";
+
+const CodeEditor = lazy(
+  () => import("base/codeEditor/codeEditor")
+    .then(module => ({default: module.CodeEditor}))
+)
 
 interface CodeControlParams<T> extends CodeNodeOptions {
   language?: Language;
@@ -95,18 +101,18 @@ export function codeControl<
       this._exposingNode = withFunction(this._node, (x) => x.value);
 
       // make sure handleChange's reference only changes when the instance changes, avoid CodeEditor frequent reconfigure
-      this.handleChange = _.debounce((state: EditorState) => {
+      this.handleChange = (state: EditorState) => {
         this.dispatchChangeValueAction(state.doc.toString());
-      }, 50);
+      };
     }
 
     override changeDispatch(dispatch: DispatchType) {
       // need to re-bind handleChange when dispatch changes, otherwise old instance's dispatch is still in use
       const comp = setFieldsNoTypeCheck(this, {
         dispatch,
-        handleChange: _.debounce((state: EditorState) => {
+        handleChange: (state: EditorState) => {
           comp.dispatchChangeValueAction(state.doc.toString());
-        }, 50),
+        },
       });
       return comp;
     }
@@ -189,26 +195,28 @@ export function codeControl<
             <CompExposingContext.Consumer>
               {(exposingData) => (
                 <>
-                  <CodeEditor
-                    {...params}
-                    bordered
-                    value={this.unevaledValue}
-                    codeType={codeType}
-                    cardTitle={toCardTitle(codeControlParams?.expectedType, this.valueAndMsg.value)}
-                    cardContent={cardContent}
-                    onChange={this.handleChange}
-                    hasError={this.valueAndMsg?.hasError()}
-                    segments={this.valueAndMsg?.extra?.segments}
-                    exposingData={{
-                      ...exposingDataForAutoComplete(
-                        editorState?.nameAndExposingInfo(),
-                        evalWithMethods
-                      ),
-                      ...exposingData,
-                    }}
-                    boostExposingData={exposingData}
-                    enableClickCompName={editorState?.forceShowGrid}
-                  />
+                  <Suspense fallback={null}>
+                    <CodeEditor
+                      {...params}
+                      bordered
+                      value={this.unevaledValue}
+                      codeType={codeType}
+                      cardTitle={toCardTitle(codeControlParams?.expectedType, this.valueAndMsg.value)}
+                      cardContent={cardContent}
+                      onChange={this.handleChange}
+                      hasError={this.valueAndMsg?.hasError()}
+                      segments={this.valueAndMsg?.extra?.segments}
+                      exposingData={{
+                        ...exposingDataForAutoComplete(
+                          editorState?.nameAndExposingInfo(),
+                          evalWithMethods
+                        ),
+                        ...exposingData,
+                      }}
+                      boostExposingData={exposingData}
+                      enableClickCompName={editorState?.forceShowGrid}
+                    />
+                  </Suspense>
                 </>
               )}
             </CompExposingContext.Consumer>
@@ -270,7 +278,7 @@ function toRegExp(value: unknown): RegExp {
   if (valueType === "RegExp") {
     return value as RegExp;
   } else if (valueType === "string") {
-    const regexStr = _.trimStart(value as string, "^");
+    const regexStr = trimStart(value as string, "^");
     return new RegExp("^" + (regexStr ?? ".*") + "$");
   }
   throw new TypeError(
@@ -314,6 +322,8 @@ export type CodeControlJSONType = ReturnType<typeof tmpFuncForJson>;
 export const StringControl = codeControl<string>(toString);
 export const NumberControl = codeControl<number>(toNumber);
 export const StringOrNumberControl = codeControl<string | number>(toStringOrNumber);
+export const MaskControl = codeControl<boolean | { style?: CSSProperties | undefined; color?: string | undefined; } | undefined>(toBooleanOrCss);
+export const ArrowControl = codeControl<boolean | { pointAtCenter: boolean } | undefined>(toBooleanOrJsonObject);
 
 // rangeCheck, don't support Infinity temporarily
 export class RangeControl {
@@ -423,7 +433,7 @@ export function stringUnionControl<T extends readonly string[]>(
 export const ColorCodeControl = codeControl<string>(
   (value: unknown) => {
     const valueString = toString(value);
-
+    
     if (valueString === "") {
       return valueString;
     }
@@ -431,6 +441,9 @@ export const ColorCodeControl = codeControl<string>(
       return toHex(valueString);
     }
     if (isThemeColorKey(valueString)) {
+      return valueString;
+    }
+    if (isValidGradient(valueString)) {
       return valueString;
     }
     throw new Error(`the argument must be type CSS color`);
@@ -454,6 +467,9 @@ export const ColorOrBoolCodeControl = codeControl<string>(
       return toHex(valueString);
     }
     if (isThemeColorKey(valueString)) {
+      return valueString;
+    }
+    if (isValidGradient(valueString)) {
       return valueString;
     }
     throw new Error(`the argument must be type CSS color or Boolean`);

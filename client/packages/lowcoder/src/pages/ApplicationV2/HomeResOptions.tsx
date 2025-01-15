@@ -12,7 +12,7 @@ import { trans, transToNode } from "../../i18n";
 import { useParams } from "react-router-dom";
 import { AppTypeEnum } from "constants/applicationConstants";
 import { CopyModal } from "pages/common/copyModal";
-import { messageInstance } from "lowcoder-design";
+import { messageInstance } from "lowcoder-design/src/components/GlobalInstances";
 
 const PopoverIcon = styled(PointIcon)`
   cursor: pointer;
@@ -38,8 +38,10 @@ export const HomeResOptions = (props: {
   onDuplicate?: (res: HomeRes | undefined) => void;
   onRename: (res: HomeRes) => void;
   onMove: (res: HomeRes) => void;
+  setModify: any;
+  modify: boolean;
 }) => {
-  const { res, onDuplicate, onRename, onMove } = props;
+  const { res, onDuplicate, onRename, onMove, setModify, modify } = props;
   const dispatch = useDispatch();
   const [showCopyModal, setShowCopyModal] = useState(false);
 
@@ -78,19 +80,24 @@ export const HomeResOptions = (props: {
                 type: HomeResInfo[res.type].name,
                 name: <b>{res.name}</b>,
               }),
-              onConfirm: () =>
+              onConfirm: () =>{
                 new Promise((resolve, reject) => {
                   dispatch(
-                    recycleApplication(
-                      { applicationId: res.id, folderId: folderId },
-                      () => {
-                        messageInstance.success(trans("success"));
-                        resolve(true);
-                      },
-                      () => reject()
-                    )
+                      recycleApplication(
+                          { applicationId: res.id, folderId: folderId },
+                          () => {
+                            messageInstance.success(trans("success"));
+                            resolve(true);
+                          },
+                          () => reject()
+                      )
                   );
-                }),
+                  setTimeout(() => {
+                    setModify(!modify);
+                  }, 200);
+                })
+
+              },
               confirmBtnType: "delete",
               okText: trans("home.moveToTrash"),
             });
@@ -115,19 +122,23 @@ export const HomeResOptions = (props: {
                 type: HomeResInfo[res.type].name.toLowerCase(),
                 name: <b>{res.name}</b>,
               }),
-              onConfirm: () =>
+              onConfirm: () =>{
                 new Promise((resolve, reject) => {
-                  dispatch(
+                dispatch(
                     deleteFolder(
-                      { folderId: res.id, parentFolderId: folderId },
-                      () => {
-                        messageInstance.success(trans("home.deleteSuccessMsg"));
-                        resolve(true);
-                      },
-                      () => reject()
+                        { folderId: res.id, parentFolderId: folderId },
+                        () => {
+                          messageInstance.success(trans("home.deleteSuccessMsg"));
+                          resolve(true);
+                        },
+                        () => reject()
                     )
-                  );
-                }),
+                );
+              })
+                setTimeout(() => {
+                  setModify(!modify);
+                }, 200);
+              },
               confirmBtnType: "delete",
               okText: trans("delete"),
             });

@@ -40,7 +40,8 @@ const MoveModalFooter = styled.div`
   gap: 8px;
 `;
 
-export const MoveToFolderModal = (props: { source?: HomeRes; onClose: () => void }) => {
+export const MoveToFolderModal = (props: { source?: HomeRes; onClose: () => void, setModify: any, modify: boolean }) => {
+  const {setModify, modify} = props;
   const [form] = Form.useForm();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -83,6 +84,9 @@ export const MoveToFolderModal = (props: { source?: HomeRes; onClose: () => void
                     () => setLoading(false)
                   )
                 );
+                  setTimeout(() => {
+                      setModify(!modify);
+                  }, 200);
               });
             }}
           >
@@ -107,8 +111,8 @@ export const MoveToFolderModal = (props: { source?: HomeRes; onClose: () => void
                     {
                       label: (
                         <FolderSelectLabel>
-                          <FolderIcon style={{ marginRight: "8px", flexShrink: 0 }} />
-                          {trans("home.rootFolder")}
+                          <FolderIcon style={{ marginRight: "8px", width: "24px", flexShrink: 0 }} />
+                          {trans("home.rootFolder")} 
                         </FolderSelectLabel>
                       ),
                       value: "",
@@ -120,7 +124,7 @@ export const MoveToFolderModal = (props: { source?: HomeRes; onClose: () => void
                 .map((f) => ({
                   label: (
                     <FolderSelectLabel>
-                      <FolderIcon style={{ marginRight: "8px", flexShrink: 0 }} />
+                      <FolderIcon style={{ marginRight: "8px", width: "24px", flexShrink: 0 }} />
                       {f.name}
                     </FolderSelectLabel>
                   ),

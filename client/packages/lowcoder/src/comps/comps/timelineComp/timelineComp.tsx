@@ -7,7 +7,7 @@ import {
 } from "lowcoder-core";
 import { trans } from "i18n";
 import { UICompBuilder, withDefault } from "../../generators";
-import { Section, sectionNames } from "lowcoder-design";
+import { ScrollBar, Section, sectionNames } from "lowcoder-design";
 import { hiddenPropertyView } from "comps/utils/propertyUtils";
 import { BoolControl } from "comps/controls/boolControl";
 import { jsonExposingStateControl, numberExposingStateControl, } from "comps/controls/codeStateControl";
@@ -30,6 +30,7 @@ import {
   heightCalculator,
   widthCalculator,
   TimeLineType,
+  TimeLineStyleType,
 } from "comps/controls/styleControlConstants";
 import { stateComp, valueComp } from "comps/generators/simpleGenerators";
 import {
@@ -45,6 +46,24 @@ import styled from "styled-components";
 import { debounce } from "lodash";
 
 import { EditorContext } from "comps/editorState";
+import { styled } from "styled-components";
+
+const TimelineWrapper = styled.div<{
+  $style: TimeLineStyleType
+}>`
+  ${props => `margin: ${props.$style.margin ?? '3px'}` };
+  ${props => `padding: ${props.$style.padding !== '3px' ? props.$style.padding : '20px 10px 0px 10px'}` };
+  ${props => `width: ${widthCalculator(props.$style.margin ?? '3px')}` };
+  ${props => `height: ${heightCalculator(props.$style.margin ?? '3px')}` };
+  ${props => `background: ${props.$style.background}` };
+  ${props => `border-radius: ${props.$style.radius}` };
+  overflow: auto;
+  overflow-x: hidden;
+
+  .ant-timeline .ant-timeline-item-head {
+    background-color: transparent;
+  }
+`;
 
 
 const Wrapper = styled.div<{ $style: TimeLineType, mode: string, offset: number }>`
@@ -97,9 +116,11 @@ const childrenMap = {
   value: jsonExposingStateControl("value", convertTimeLineData, timelineDate),
   mode: dropdownControl(modeOptions, "alternate"),
   reverse: BoolControl,
+  autoHeight: AutoHeightControl,
+  verticalScrollbar: withDefault(BoolControl, false),
   pending: withDefault(StringControl, trans("timeLine.defaultPending")),
   onEvent: eventHandlerControl(EventOptions),
-  style: styleControl(TimeLineStyle),
+  style: styleControl(TimeLineStyle, 'style'),
   clickedObject: valueComp<timelineNode>({ title: "" }),
   clickedIndex: valueComp<number>(0),
   offset: withDefault(NumberControl, 0),
@@ -172,32 +193,22 @@ const TimelineComp = (
   }));
 
   return (
-    <Wrapper $style={props.style}
-      mode={mode}
-      offset={props.offset}
-      ref={divRef}
-      onScrollCapture={
-        debounce(() => {
-          if (divRef.current)
-            props.scrollTo.onChange(divRef.current.scrollTop)
-        }, 300, {
-          'trailing': true
-        })
-      }
-    >
-      <Timeline
-        mode={props?.mode || "left"}
-        reverse={props?.reverse}
-        pending={
-          props?.pending && (
-            <span style={{ color: style?.titleColor }}>
-              {props?.pending || ""}
-            </span>
-          )
-        }
-        items={timelineItems}
-      />
-    </Wrapper>
+    <ScrollBar hideScrollbar={!props.verticalScrollbar}>
+      <TimelineWrapper $style={style}>
+        <Timeline
+          mode={props?.mode || "left"}
+          reverse={props?.reverse}
+          pending={
+            props?.pending && (
+              <span style={{ color: style?.titleColor }}>
+                {props?.pending || ""}
+              </span>
+            )
+          }
+          items={timelineItems}
+        />
+      </TimelineWrapper>
+    </ScrollBar>
   );
 };
 
@@ -224,7 +235,12 @@ let TimeLineBasicComp = (function () {
 
         {["layout", "both"].includes(useContext(EditorContext).editorModeStatus) && (
           <><Section name={sectionNames.layout}>
-            {children.mode.propertyView({
+            {children.autoHeight.getPropertyView()}
+              {!children.autoHeight.getView() &&
+                children.verticalScrollbar.propertyView({
+                  label: trans("prop.showVerticalScrollbar")
+                })}
+              {children.mode.propertyView({
               label: trans("timeLine.mode"),
               tooltip: trans("timeLine.modeTooltip"),
             })}
@@ -252,7 +268,7 @@ let TimeLineBasicComp = (function () {
 
 TimeLineBasicComp = class extends TimeLineBasicComp {
   override autoHeight(): boolean {
-    return false;
+    return this.children.autoHeight.getView();
   }
 };
 

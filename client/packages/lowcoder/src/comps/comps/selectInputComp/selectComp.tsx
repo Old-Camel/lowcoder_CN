@@ -1,5 +1,5 @@
 import { styleControl } from "comps/controls/styleControl";
-import { SelectStyle } from "comps/controls/styleControlConstants";
+import {  ChildrenMultiSelectStyle, InputFieldStyle, LabelStyle, SelectStyle } from "comps/controls/styleControlConstants";
 import { trans } from "i18n";
 import { stringExposingStateControl } from "../../controls/codeStateControl";
 import { UICompBuilder } from "../../generators";
@@ -15,17 +15,20 @@ import {
   SelectInputInvalidConfig,
   useSelectInputValidate,
 } from "./selectInputConstants";
-import { useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { RecordConstructorToView } from "lowcoder-core";
 import { fixOldInputCompData } from "../textInputComp/textInputConstants";
-import { migrateOldData } from "comps/generators/simpleGenerators";
+import { migrateOldData, withDefault } from "comps/generators/simpleGenerators";
 
 let SelectBasicComp = (function () {
   const childrenMap = {
     ...SelectChildrenMap,
     defaultValue: stringExposingStateControl("defaultValue"),
     value: stringExposingStateControl("value"),
-    style: styleControl(SelectStyle),
+    style: styleControl(InputFieldStyle , 'style'),
+    labelStyle: styleControl(LabelStyle , 'labelStyle'),
+    inputFieldStyle: styleControl(SelectStyle , 'inputFieldStyle'),
+    childrenInputFieldStyle: styleControl(ChildrenMultiSelectStyle, 'childrenInputFieldStyle')
   };
   return new UICompBuilder(childrenMap, (props, dispatch) => {
     const [
@@ -37,10 +40,13 @@ let SelectBasicComp = (function () {
     propsRef.current = props;
 
     const valueSet = new Set<any>(props.options.map((o) => o.value)); // Filter illegal default values entered by the user
-    
+
     return props.label({
       required: props.required,
       style: props.style,
+      labelStyle: props.labelStyle,
+      inputFieldStyle:props.inputFieldStyle,
+      childrenInputFieldStyle:props.childrenInputFieldStyle,
       children: (
         <SelectUIView
           {...props}
@@ -49,6 +55,7 @@ let SelectBasicComp = (function () {
           dispatch={dispatch}
         />
       ),
+      showValidationWhenEmpty: props.showValidationWhenEmpty,
       ...validateState,
     });
   })

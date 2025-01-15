@@ -14,7 +14,7 @@ import { EditorContainer, EmptyContent } from "pages/common/styledComponent";
 import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { isUserViewMode, useAppPathParam } from "util/hooks";
-import { StringControl, jsonControl } from "comps/controls/codeControl";
+import { BoolCodeControl, StringControl, jsonControl } from "comps/controls/codeControl";
 import { styleControl } from "comps/controls/styleControl";
 import {
   NavLayoutStyle,
@@ -39,9 +39,14 @@ import {
   menuItemStyleOptions
 } from "./navLayoutConstants";
 import { BoolControl } from "@lowcoder-ee/index.sdk";
+import { clickEvent, eventHandlerControl } from "@lowcoder-ee/comps/controls/eventHandlerControl";
+import { childrenToProps } from "@lowcoder-ee/comps/generators/multi";
+
+const { Header } = Layout;
 
 const DEFAULT_WIDTH = 240;
 type MenuItemStyleOptionValue = "normal" | "hover" | "active";
+const EventOptions = [clickEvent] as const;
 
 const StyledSide = styled(Layout.Sider) <{ NavLayoutStyle: NavLayoutStyleType }>`
   max-height: calc(100vh - ${TopHeaderHeight});
@@ -101,19 +106,20 @@ const StyledMenu = styled(AntdMenu) <{
   border: ${(props) => `1px solid ${props.$navItemActiveStyle?.border}`};
 }
 
-.ant-menu-submenu {
-  margin: ${(props) => props.$navItemStyle?.margin};
-  width: ${(props) => props.$navItemStyle?.width};
+  .ant-menu-submenu {
+    margin: ${(props) => props.$navItemStyle?.margin};
+    width: ${(props) => props.$navItemStyle?.width};
+    padding: 0;
 
-  .ant-menu-submenu-title {
-    width: 100%;
-    height: auto !important;
-    background-color: ${(props) => props.$navItemStyle?.background};
-    color: ${(props) => props.$navItemStyle?.text};
-    border-radius: ${(props) => props.$navItemStyle?.radius} !important;
-    border: ${(props) => `1px solid ${props.$navItemStyle?.border}`};
-    margin: 0;
-    padding: ${(props) => props.collapsible ? '' : props.$navItemStyle?.padding};
+    .ant-menu-submenu-title {
+      width: 100%;
+      height: auto !important;
+      background-color: ${(props) => props.$navItemStyle?.background};
+      color: ${(props) => props.$navItemStyle?.text};
+      border-radius: ${(props) => props.$navItemStyle?.radius} !important;
+      border: ${(props) => `1px solid ${props.$navItemStyle?.border}`};
+      margin: 0;
+      padding: ${(props) => props.collapsible ? '' : props.$navItemStyle?.padding};
 
   }
 
@@ -179,6 +185,7 @@ function convertTreeData(data: any) {
 
 let NavTmpLayout = (function () {
   const childrenMap = {
+    onEvent: eventHandlerControl(EventOptions),
     dataOptionType: dropdownControl(DataOptionType, DataOption.Manual),
     items: withDefault(LayoutMenuItemListComp, [
       {
@@ -190,11 +197,11 @@ let NavTmpLayout = (function () {
     width: withDefault(StringControl, DEFAULT_WIDTH),
     backgroundImage: withDefault(StringControl, ""),
     mode: dropdownControl(ModeOptions, "inline"),
-    navStyle: withDefault(styleControl(NavLayoutStyle), defaultStyle),
-    navItemStyle: withDefault(styleControl(NavLayoutItemStyle), defaultStyle),
-    navItemHoverStyle: withDefault(styleControl(NavLayoutItemHoverStyle), {}),
-    navItemActiveStyle: withDefault(styleControl(NavLayoutItemActiveStyle), {}),
-    collapsible: BoolControl,
+    collapse: BoolCodeControl,
+    navStyle: styleControl(NavLayoutStyle, 'navStyle'),
+    navItemStyle: styleControl(NavLayoutItemStyle, 'navItemStyle'),
+    navItemHoverStyle: styleControl(NavLayoutItemHoverStyle, 'navItemHoverStyle'),
+    navItemActiveStyle: styleControl(NavLayoutItemActiveStyle, 'navItemActiveStyle'),
   };
   return new MultiCompBuilder(childrenMap, (props) => {
     return null;
@@ -217,6 +224,9 @@ let NavTmpLayout = (function () {
                 })
             }
           </Section>
+          <Section name={trans("eventHandler.eventHandlers")}>
+            { children.onEvent.getPropertyView() }
+          </Section>
           <Section name={sectionNames.layout}>
             {children.width.propertyView({
               label: trans("navLayout.width"),
@@ -226,6 +236,9 @@ let NavTmpLayout = (function () {
             {children.mode.propertyView({
               label: trans("labelProp.position"),
               radioButton: true
+            })}
+            { children.collapse.propertyView({
+              label: trans("labelProp.collapse"),
             })}
             {children.backgroundImage.propertyView({
               label: trans("navLayout.BackgroundImage"),
@@ -270,6 +283,7 @@ NavTmpLayout = withViewFn(NavTmpLayout, (comp) => {
   const items = comp.children.items.getView();
   const navWidth = comp.children.width.getView();
   const navMode = comp.children.mode.getView();
+  const navCollapse = comp.children.collapse.getView();
   const navStyle = comp.children.navStyle.getView();
   const navItemStyle = comp.children.navItemStyle.getView();
   const navItemHoverStyle = comp.children.navItemHoverStyle.getView();
@@ -279,6 +293,8 @@ NavTmpLayout = withViewFn(NavTmpLayout, (comp) => {
   const dataOptionType = comp.children.dataOptionType.getView();
   const collapsible = comp.children.collapsible.getView();
   const [collapsed, setCollapsed] = useState(false);
+  const onEvent = comp.children.onEvent.getView();
+
   // filter out hidden. unauthorised items filtered by server
   const filterItem = useCallback((item: LayoutMenuItemComp): boolean => {
     return !item.children.hidden.getView();
@@ -316,6 +332,7 @@ NavTmpLayout = withViewFn(NavTmpLayout, (comp) => {
   }, [dataOptionType, jsonItems, items, generateItemKeyRecord]);
 
   const onMenuItemClick = useCallback(({ key }: { key: string }) => {
+    onEvent('click')
     const itemComp = itemKeyRecord[key]
 
     const url = [
@@ -552,41 +569,46 @@ NavTmpLayout = withViewFn(NavTmpLayout, (comp) => {
   if (!_.isEmpty(backgroundImage)) {
     backgroundStyle = `center / cover url('${backgroundImage}') no-repeat, ${backgroundStyle}`;
   }
+
+  let navMenu = (
+    <StyledMenu
+      items={menuItems}
+      mode={navMode}
+      style={{
+        height: `calc(100% - ${getVerticalMargin(navStyle.margin.split(' '))})`,
+        width: `calc(100% - ${getHorizontalMargin(navStyle.margin.split(' '))})`,
+        borderRight: navMode !== 'horizontal' ? `1px solid ${navStyle.border}` : 'none',
+        borderBottom: navMode === 'horizontal' ? `1px solid ${navStyle.border}` : 'none',
+        borderRadius: navStyle.radius,
+        color: navStyle.text,
+        margin: navStyle.margin,
+        padding: navStyle.padding,
+        background: backgroundStyle,
+        flex: 1,
+        minWidth: 0,
+      }}
+      defaultOpenKeys={defaultOpenKeys}
+      selectedKeys={[selectedKey]}
+      $navItemStyle={{
+        width: navMode === 'horizontal' ? 'auto' : `calc(100% - ${getHorizontalMargin(navItemStyle.margin.split(' '))})`,
+        ...navItemStyle,
+      }}
+      $navItemHoverStyle={navItemHoverStyle}
+      $navItemActiveStyle={navItemActiveStyle}
+    />
+  );
+
   let content = (
     <Layout>
-      <StyledSide
-        collapsible={collapsible}
-        collapsed={collapsed}
-        onCollapse={(value) => setCollapsed(value)}
-        theme="light"
-        width={navWidth}
-        NavLayoutStyle={navStyle}
-      >
-        <StyledMenu
-          items={menuItems}
-          mode={navMode}
-          collapsible={collapsible}
-          collapsed={collapsed}
-          style={{
-            height: `calc(100% - ${getVerticalMargin(navStyle.margin.split(' '))})`,
-            width: `calc(100% - ${getHorizontalMargin(navStyle.margin.split(' '))})`,
-            borderRight: `1px solid ${navStyle.border}`,
-            borderRadius: navStyle.radius,
-            color: navStyle.text,
-            margin: navStyle.margin,
-            padding: navStyle.padding,
-            background: backgroundStyle,
-          }}
-          defaultOpenKeys={defaultOpenKeys}
-          selectedKeys={[selectedKey]}
-          $navItemStyle={{
-            width: `calc(100% - ${getHorizontalMargin(navItemStyle.margin.split(' '))})`,
-            ...navItemStyle,
-          }}
-          $navItemHoverStyle={navItemHoverStyle}
-          $navItemActiveStyle={navItemActiveStyle}
-        />
-      </StyledSide>
+      {navMode === 'horizontal' ? (
+        <Header style={{ display: 'flex', alignItems: 'center', padding: 0 }}>
+          { navMenu }
+        </Header>
+      ) : (
+        <StyledSide theme="light" width={navWidth} collapsed={navCollapse}>
+          {navMenu}
+        </StyledSide>
+      )}
       <MainContent>{pageView}</MainContent>
     </Layout>
   );

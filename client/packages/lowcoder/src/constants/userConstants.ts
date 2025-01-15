@@ -22,6 +22,7 @@ export type UserConnection = {
 export type BaseUserInfo = {
   id: string;
   username: string;
+  uiLanguage: string;
   currentOrgId: string;
   connections?: UserConnection[];
   isAnonymous: boolean;
@@ -46,6 +47,7 @@ export const defaultUser: User = {
   orgs: [],
   orgRoleMap: new Map(),
   username: ANONYMOUS_USERNAME,
+  uiLanguage: "en",
   currentOrgId: "",
   id: "",
   hasPassword: false,
@@ -61,6 +63,7 @@ export const defaultUser: User = {
 export type CurrentUser = {
   id: string;
   name: string;
+  uiLanguage: string;
   avatarUrl: string;
   email: string;
   ip: string;
@@ -74,11 +77,19 @@ export type CurrentUser = {
 export const defaultCurrentUser: CurrentUser = {
   id: "",
   name: ANONYMOUS_USERNAME,
+  uiLanguage: "en",
   avatarUrl: "",
   email: "",
   ip: "",
   groups: [],
   extra: {},
 };
+
+export type ApiKey = {
+  id: string;
+  name: string;
+  description: string;
+  token: string;
+}
 
 export type UserStatusType = keyof BaseUserInfo["userStatus"];

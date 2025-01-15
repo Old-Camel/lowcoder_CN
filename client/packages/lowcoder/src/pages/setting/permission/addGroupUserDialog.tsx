@@ -1,4 +1,4 @@
-import Column from "antd/lib/table/Column";
+import Column from "antd/es/table/Column";
 import OrgApi from "api/orgApi";
 import { GroupUser, MEMBER_ROLE, OrgUser } from "constants/orgConstants";
 import { CheckBox, CustomModal } from "lowcoder-design";
@@ -31,8 +31,10 @@ function AddGroupUserDialog(props: {
   orgUsersFetching: boolean;
   groupUsers: GroupUser[];
   style?: CSSProperties;
+  setModify?: any;
+  modify?: boolean
 }) {
-  const { orgId, orgUsers, orgUsersFetching, groupUsers, groupId } = props;
+  const { orgId, orgUsers, orgUsersFetching, groupUsers, groupId, setModify, modify } = props;
   const groupUserIdMap = new Map(groupUsers.map((gUser) => [gUser.userId, gUser]));
   const [dialogVisible, setDialogVisible] = useState(false);
   const addableUsers = orgUsers.filter((user) => !groupUserIdMap.has(user.userId));
@@ -83,6 +85,9 @@ function AddGroupUserDialog(props: {
             }
           }
           dispatch(fetchGroupUsersAction({ groupId }));
+          setTimeout(() => {
+            setModify(!modify);
+          }, 200);
           setDialogVisible(false);
         }}
       >

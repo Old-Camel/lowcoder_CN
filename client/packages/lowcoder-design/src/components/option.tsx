@@ -8,7 +8,7 @@ import React, { useState } from "react";
 import { CSS } from "@dnd-kit/utilities";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { ConstructorToComp, MultiCompConstructor } from "lowcoder-core";
-import { ReactComponent as WarnIcon } from "icons/icon-warning-white.svg";
+import { ReactComponent as WarnIcon } from "icons/v1/icon-warning-white.svg";
 import { DndContext } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { ActiveTextColor, GreyTextColor } from "constants/style";
@@ -273,7 +273,7 @@ function Option<T extends ConstructorToComp<MultiCompConstructor>>(props: {
                         del={props.onDel ? () => props.onDel!(index) : undefined}
                       >
                         <StyledPointIcon
-                          onClick={(e) => {
+                          onClick={(e: any) => {
                             e.stopPropagation();
                           }}
                         />

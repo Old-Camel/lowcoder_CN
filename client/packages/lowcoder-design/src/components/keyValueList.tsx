@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from "styled-components";
-import { ReactComponent as Bin } from "icons/icon-recycle-bin.svg";
+import { ReactComponent as Bin } from "icons/v1/icon-recycle-bin.svg";
 import { TacoButton } from "./button";
 import { ReactNode } from "react";
 import { BatchAddIcon, BluePlusIcon } from "icons";

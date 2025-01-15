@@ -21,7 +21,7 @@ import {
   withExposingConfigs,
 } from "comps/generators/withExposing";
 import { Section, sectionNames, ValueFromOption } from "lowcoder-design";
-import { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import styled, { css } from "styled-components";
 import { RecordConstructorToView } from "lowcoder-core";
 import { InputEventHandlerControl } from "../../controls/eventHandlerControl";
@@ -30,7 +30,7 @@ import { formDataChildren, FormDataPropertyView } from "../formComp/formDataCons
 import { withMethodExposing, refMethods } from "../../generators/withMethodExposing";
 import { RefControl } from "../../controls/refControl";
 import { styleControl } from "comps/controls/styleControl";
-import { InputLikeStyle, InputLikeStyleType, heightCalculator, widthCalculator } from "comps/controls/styleControlConstants";
+import {  AnimationStyle, InputFieldStyle, InputLikeStyle, InputLikeStyleType, LabelStyle, heightCalculator, widthCalculator } from "comps/controls/styleControlConstants";
 import {
   disabledPropertyView,
   hiddenPropertyView,
@@ -59,6 +59,7 @@ const getStyle = (style: InputLikeStyleType) => {
   return css`
     border-radius: ${style.radius};
     border-width:${style.borderWidth} !important;
+    // line-height: ${style.lineHeight} !important;
     // still use antd style when disabled
     &:not(.ant-input-number-disabled) {
       color: ${style.text};
@@ -116,9 +117,11 @@ const getStyle = (style: InputLikeStyleType) => {
   `;
 };
 
-const InputNumber = styled(AntdInputNumber) <{
+const InputNumber = styled(AntdInputNumber)<{
   $style: InputLikeStyleType;
 }>`
+  box-shadow: ${(props) =>
+    `${props.$style?.boxShadow} ${props.$style?.boxShadowColor}`};
   width: 100%;
   ${(props) => props.$style && getStyle(props.$style)}
 `;
@@ -254,11 +257,15 @@ const childrenMap = {
   allowNull: BoolControl,
   onEvent: InputEventHandlerControl,
   viewRef: RefControl<HTMLInputElement>,
-  style: styleControl(InputLikeStyle),
+  style: styleControl(InputFieldStyle , 'style') , 
+  labelStyle: styleControl(LabelStyle , 'labelStyle'),
+  prefixText : stringExposingStateControl("defaultValue"),
+  animationStyle: styleControl(AnimationStyle , 'animationStyle'),
   prefixIcon: IconControl,
-
+  inputFieldStyle: styleControl(InputLikeStyle , 'inputFieldStyle'),
   // validation
   required: BoolControl,
+  showValidationWhenEmpty: BoolControl,
   min: UndefinedNumberControl,
   max: UndefinedNumberControl,
   customRule: CustomRuleControl,
@@ -318,8 +325,8 @@ const CustomInputNumber = (props: RecordConstructorToView<typeof childrenMap>) =
       placeholder={props.placeholder}
       stringMode={true}
       precision={props.precision}
-      $style={props.style}
-      prefix={hasIcon(props.prefixIcon) && props.prefixIcon}
+      $style={props.inputFieldStyle}
+      prefix={hasIcon(props.prefixIcon) ? props.prefixIcon : props.prefixText.value}
       onPressEnter={() => {
         handleFinish();
         props.onEvent("submit");
@@ -377,6 +384,10 @@ let NumberInputTmpComp = (function () {
       required: props.required,
       children: <CustomInputNumber {...props} />,
       style: props.style,
+      labelStyle: props.labelStyle,
+      inputFieldStyle:props.inputFieldStyle,
+      animationStyle:props.animationStyle,
+      showValidationWhenEmpty: props.showValidationWhenEmpty,
       ...validate(props),
     });
   })
@@ -393,6 +404,7 @@ let NumberInputTmpComp = (function () {
         {(useContext(EditorContext).editorModeStatus === "logic" || useContext(EditorContext).editorModeStatus === "both") && (
           <><Section name={sectionNames.validation}>
             {requiredPropertyView(children)}
+            {children.showValidationWhenEmpty.propertyView({label: trans("prop.showEmptyValidation")})}
             {children.min.propertyView({ label: trans("prop.minimum") })}
             {children.max.propertyView({ label: trans("prop.maximum") })}
             {children.customRule.propertyView({})}
@@ -414,6 +426,7 @@ let NumberInputTmpComp = (function () {
             {children.step.propertyView({ label: trans("numberInput.step") })}
             {children.precision.propertyView({ label: trans("numberInput.precision") })}
             {children.prefixIcon.propertyView({ label: trans("button.prefixIcon") })}
+            {children.prefixText.propertyView({ label: trans("button.prefixText") })}
             {children.allowNull.propertyView({ label: trans("numberInput.allowNull") })}
             {children.thousandsSeparator.propertyView({
               label: trans("numberInput.thousandsSeparator"),
@@ -424,9 +437,20 @@ let NumberInputTmpComp = (function () {
         )}
 
         {(useContext(EditorContext).editorModeStatus === "layout" || useContext(EditorContext).editorModeStatus === "both") && (
+          <>
           <Section name={sectionNames.style}>
             {children.style.getPropertyView()}
           </Section>
+          <Section name={sectionNames.labelStyle}>
+            {children.labelStyle.getPropertyView()}
+          </Section>
+          <Section name={sectionNames.inputFieldStyle}>
+            {children.inputFieldStyle.getPropertyView()}
+          </Section>
+          <Section name={sectionNames.animationStyle} hasTooltip={true}>
+            {children.animationStyle.getPropertyView()}
+          </Section>
+          </>
         )}
       </>
     ))

@@ -38,6 +38,9 @@ import {
   TreeSelectStyleType,
   widthCalculator,
   heightCalculator,
+
+  SelectStyle,
+  ChildrenMultiSelectStyleType,
 } from "comps/controls/styleControlConstants";
 import { stateComp, withDefault } from "../../generators";
 import {
@@ -53,11 +56,12 @@ import { RefControl } from "comps/controls/refControl";
 import { BaseSelectRef } from "rc-select";
 import { refMethods } from "comps/generators/withMethodExposing";
 import { blurMethod, focusMethod } from "comps/utils/methodUtils";
-
 import { useContext } from "react";
 import { EditorContext } from "comps/editorState";
 import { pinyin } from 'pinyin-pro';
 import { FirstPinyinOption } from "../autoCompleteComp/autoCompleteConstants";
+import { styleControl } from "comps/controls/styleControl";
+import SupaDemoDisplay from "comps/utils/supademoDisplay";
 
 export const getStyle = (
   style:
@@ -76,7 +80,9 @@ export const getStyle = (
     .ant-select-selection-search {	
       padding: ${style.padding};
     }	
-    .ant-select-selection-search-input {
+    .ant-select-selection-search-input,
+    .ant-select-selection-item,
+    .ant-select-selection-item .option-label {
       font-family:${(style as SelectStyleType).fontFamily} !important;
       text-transform:${(style as SelectStyleType).textTransform} !important;
       text-decoration:${(style as SelectStyleType).textDecoration} !important;
@@ -105,21 +111,22 @@ export const getStyle = (
       }
 
       .ant-select-selector {
-        background-color: ${style.background};
+        background: ${style.background};
         border-color: ${style.border};
         border-width:${(style as SelectStyleType).borderWidth};
+        box-shadow:${(style as SelectStyleType).boxShadow} ${(style as SelectStyleType).boxShadowColor};
       }
 
       &.ant-select-focused,
       &:hover {
         .ant-select-selector {
-          border-color: ${style.accent};
+          border-color: ${style.accent} !important;
         }
       }
 
       .ant-select-arrow,
       .ant-select-clear {
-        background-color: ${style.background};
+        // background: ${style.background};
         color: ${style.text === "#222222"
       ? "#8B8FA3"
       : isDarkColor(style.text)
@@ -137,7 +144,7 @@ export const getStyle = (
 
       &.ant-select-multiple .ant-select-selection-item {
         border: none;
-        background-color: ${(style as MultiSelectStyleType).tags};
+        background: ${(style as MultiSelectStyleType).tags};
         color: ${(style as MultiSelectStyleType).tagsText};
         border-radius: ${style.radius};
 
@@ -180,16 +187,31 @@ const getDropdownStyle = (style: MultiSelectStyleType) => {
   `;
 };
 
-const Select = styled(AntdSelect) <{ $style: SelectStyleType & MultiSelectStyleType }>`
+const Select = styled(AntdSelect) <{ $style: SelectStyleType & MultiSelectStyleType,$inputFieldStyle:SelectStyleType }>`
   width: 100%;
-
-  ${(props) => props.$style && getStyle(props.$style)}
+  ${(props) => props.$inputFieldStyle && getStyle(props.$inputFieldStyle)}
 `;
 
-const DropdownStyled = styled.div<{ $style: MultiSelectStyleType }>`
-  ${(props) => props.$style && getDropdownStyle(props.$style)}
+const DropdownStyled = styled.div<{ $style: ChildrenMultiSelectStyleType }>`
+    background: ${props => props.$style?.background};
+    border: ${props => props.$style?.border};
+    border-style: ${props => props.$style?.borderStyle};
+    border-width: ${props => props.$style?.borderWidth};
+    border-radius: ${props => props.$style?.radius};
+    rotate: ${props => props.$style?.rotation};
+    margin: ${props => props.$style?.margin};
+    padding: ${props => props.$style?.padding};
   .ant-select-item-option-content {
-    ${(props) => `padding: ${props.$style.padding}`};
+    font-size: ${props => props.$style?.textSize};
+    font-style: ${props => props.$style?.fontStyle};
+    font-family: ${props => props.$style?.fontFamily};
+    font-weight: ${props => props.$style?.textWeight};
+    text-transform: ${props => props.$style?.textTransform};
+    color: ${props => props.$style?.text};
+    line-height: ${props => props.$style?.lineHeight};
+  }
+  .option-label{
+    text-decoration: ${props => props.$style?.textDecoration} !important;
   }
   .option-label img {
     min-width: 14px;
@@ -219,6 +241,7 @@ export const SelectChildrenMap = {
   viewRef: RefControl<BaseSelectRef>,
   margin: MarginControl,
   padding: PaddingControl,
+  inputFieldStyle:styleControl(SelectStyle),
   ...SelectInputValidationChildren,
   ...formDataChildren,
 };
@@ -228,13 +251,18 @@ export const SelectUIView = (
     mode?: "multiple" | "tags";
     value: any;
     style: SelectStyleType | MultiSelectStyleType;
+    childrenInputFieldStyle: ChildrenMultiSelectStyleType;
+    inputFieldStyle: SelectStyleType;
     onChange: (value: any) => void;
     dispatch: DispatchType;
+    autoFocus?: boolean;
   }
-) => (
-  <Select
+) => {
+  return <Select
     ref={props.viewRef}
+    autoFocus={props.autoFocus}
     mode={props.mode}
+    $inputFieldStyle={props.inputFieldStyle}
     $style={props.style as SelectStyleType & MultiSelectStyleType}
     disabled={props.disabled}
     allowClear={props.allowClear}
@@ -251,7 +279,7 @@ export const SelectUIView = (
       }
     }}
     dropdownRender={(originNode: ReactNode) => (
-      <DropdownStyled $style={props.style as MultiSelectStyleType}>
+      <DropdownStyled $style={props.childrenInputFieldStyle as ChildrenMultiSelectStyleType}>
         {originNode}
       </DropdownStyled>
     )}
@@ -287,7 +315,7 @@ export const SelectUIView = (
         </Select.Option>
       ))}
   </Select>
-);
+}
 
 export const SelectPropertyView = (
   children: RecordConstructorToComp<
@@ -298,6 +326,9 @@ export const SelectPropertyView = (
     defaultValue: { propertyView: (params: ControlParams) => ControlNode };
     value: { propertyView: (params: ControlParams) => ControlNode };
     style: { getPropertyView: () => ControlNode };
+    labelStyle: { getPropertyView: () => ControlNode };
+    inputFieldStyle: { getPropertyView: () => ControlNode };
+    childrenInputFieldStyle: { getPropertyView: () => ControlNode };
   }
 ) => (
   <>
@@ -336,9 +367,20 @@ export const SelectPropertyView = (
     {["layout", "both"].includes(
       useContext(EditorContext).editorModeStatus
     ) && (
-        <Section name={sectionNames.style}>
-          {children.style.getPropertyView()}
-        </Section>
+        <>
+          <Section name={sectionNames.style}>
+            {children.style.getPropertyView()}
+          </Section>
+          <Section name={sectionNames.labelStyle}>
+            {children.labelStyle.getPropertyView()}
+          </Section>
+          <Section name={sectionNames.inputFieldStyle}>
+            {children.inputFieldStyle.getPropertyView()}
+          </Section>
+          <Section name={sectionNames.childrenInputFieldStyle}>
+            {children.childrenInputFieldStyle.getPropertyView()}
+          </Section>
+        </>
       )}
   </>
 );

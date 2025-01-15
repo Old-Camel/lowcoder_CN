@@ -1,6 +1,6 @@
 {
   "name": "lowcoder-sdk",
-  "version": "2.3.4",
+  "version": "2.5.3",
   "type": "module",
   "files": [
     "src",
@@ -16,6 +16,10 @@
       "import": "./dist/lowcoder-sdk.js",
       "require": "./dist/lowcoder-sdk.js"
     },
+    "./appView": {
+      "import": "./dist/appView.js",
+      "require": "./dist/appView.js"
+    },
     "./dataSource": {
       "types": "./dataSource.d.ts"
     },
@@ -24,8 +28,8 @@
     }
   },
   "scripts": {
-    "build": "vite build",
-    "start": "vite"
+    "build": "NODE_OPTIONS=--max_old_space_size=6442 vite build",
+    "start": "NODE_OPTIONS=--max_old_space_size=2048 vite"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.2",
@@ -43,7 +47,7 @@
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript": "^1.0.1",
     "typescript": "^4.8.4",
-    "vite": "^4.5.2",
+    "vite": "^4.5.5",
     "vite-plugin-svgr": "^2.2.2",
     "vite-tsconfig-paths": "^3.6.0"
   },

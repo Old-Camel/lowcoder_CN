@@ -31,7 +31,8 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import dayjs from "dayjs";
 import "dayjs/locale/zh-cn";
 import { getInitialsAndColorCode } from "util/stringUtils";
-import { CloseOutlined } from "@ant-design/icons";
+import { default as CloseOutlined } from "@ant-design/icons/CloseOutlined";
+
 dayjs.extend(relativeTime);
 dayjs.locale("zh-cn");
 
@@ -48,12 +49,10 @@ const childrenMap = {
     name: "{{currentUser.name}}",
     email: "{{currentUser.email}}",
   }),
-  mentionList: jsonControl(checkMentionListData, {
-    "@": ["Li Lei", "Han Meimei"],
-    "#": ["123", "456", "789"],
-  }),
+  mentionList: jsonControl(checkMentionListData, {"@":["John Doe","Jane Doe","Michael Smith","Emily Davis","Robert Johnson","Patricia Brown","William Jones","Jennifer Miller","David Wilson","Linda Moore"],"#":["#lowcode","#automation","#appbuilder","#nocode","#workflow","#draganddrop","#rapiddevelopment","#digitaltransformation","#integration","#api"]}),
   onEvent: eventHandlerControl(EventOptions),
-  style: styleControl(CommentStyle),
+  style: styleControl(CommentStyle , 'style'),
+  animationStyle: styleControl(AnimationStyle , 'animationStyle'),
   commentList: jsonValueExposingStateControl("commentList", []),
   deletedItem: jsonValueExposingStateControl("deletedItem", []),
   submitedItem: jsonValueExposingStateControl("submitedItem", {}),
@@ -80,6 +79,7 @@ const CommentCompBase = (
     userInfo,
     placeholder,
     deleteAble,
+    animationStyle,
   } = props;
   type PrefixType = "@" | keyof typeof mentionList;
   // 用于保存整合后的提及列表 static
@@ -325,9 +325,10 @@ const CommentCompBase = (
 };
 
 let CommentBasicComp = (function () {
-  return new UICompBuilder(childrenMap, (props, dispatch) => (
+  return new UICompBuilder(childrenMap, (props, dispatch) => {
+    return (
     <CommentCompBase {...props} dispatch={dispatch} />
-  ))
+  )})
     .setPropertyViewFn((children) => (
       <>
         <Section name={sectionNames.basic}>

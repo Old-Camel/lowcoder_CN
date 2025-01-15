@@ -7,12 +7,16 @@ import { StringControl } from "comps/controls/codeControl";
 import { alignWithJustifyControl } from "comps/controls/alignControl";
 import { navListComp } from "./navItemComp";
 import { menuPropertyView } from "./components/MenuItemList";
-import { DownOutlined } from "@ant-design/icons";
+import { default as DownOutlined } from "@ant-design/icons/DownOutlined";
 import { default as Dropdown } from "antd/es/dropdown";
 import { default as Menu, MenuProps } from "antd/es/menu";
 import { migrateOldData } from "comps/generators/simpleGenerators";
 import { styleControl } from "comps/controls/styleControl";
-import { NavigationStyle } from "comps/controls/styleControlConstants";
+import {
+  AnimationStyle,
+  AnimationStyleType,
+  NavigationStyle,
+} from "comps/controls/styleControlConstants";
 import { hiddenPropertyView } from "comps/utils/propertyUtils";
 import { trans } from "i18n";
 
@@ -26,15 +30,20 @@ type IProps = {
   $borderWidth: string;
   $borderRadius: string;
   $padding: string;
+  $borderStyle: string;
+  $animationStyle: AnimationStyleType;
 };
 
-const Wrapper = styled("div") <Pick<IProps, "$bgColor" | "$borderColor" | "$borderWidth" | "$borderRadius"| "$padding">>`
+const Wrapper = styled("div")<
+  Pick<IProps, "$bgColor" | "$borderColor" | "$borderWidth" | "$borderRadius"|"$padding"|"$borderStyle"|"$animationStyle">
+  >`
+${props=>props.$animationStyle}
   height: 100%;
-  border-radius: ${(props) => props.$borderRadius ? props.$borderRadius : '2px'};
+  border-radius: ${(props) =>props.$borderRadius ? props.$borderRadius : '2px'};
   box-sizing: border-box;
-  border: ${(props) => props.$borderWidth ? `${props.$borderWidth}` : '1px'} solid ${(props) => props.$borderColor};
-  background-color: ${(props) => props.$bgColor};
   padding: ${(props) => props.$padding};
+  border: ${(props) => props.$borderWidth ? `${props.$borderWidth}` : '1px'} ${props=>props.$borderStyle} ${(props) => props.$borderColor};
+  background: ${(props) => props.$bgColor};
 `;
 
 const NavInner = styled("div") <Pick<IProps, "$justify">>`
@@ -128,7 +137,8 @@ const childrenMap = {
   logoUrl: StringControl,
   logoEvent: withDefault(eventHandlerControl(logoEventHandlers), [{ name: "click" }]),
   horizontalAlignment: alignWithJustifyControl(),
-  style: migrateOldData(styleControl(NavigationStyle), fixOldStyleData),
+  style: migrateOldData(styleControl(NavigationStyle, 'style'), fixOldStyleData),
+  animationStyle: styleControl(AnimationStyle, 'animationStyle'),
   items: withDefault(navListComp(), [
     {
       label: trans("menuItem") + " 1",
@@ -205,10 +215,12 @@ const NavCompBase = new UICompBuilder(childrenMap, (props) => {
 
   return (
     <Wrapper
+      $borderStyle={props.style.borderStyle}
+      $animationStyle={props.animationStyle}
       $borderColor={props.style.border}
       $bgColor={props.style.background}
       $borderWidth={props.style.borderWidth}
-      $borderRadius={props.style.borderRadius}
+      $borderRadius={props.style.radius}
       $padding={props.style.padding}
     >
       <NavInner $justify={justify}>
@@ -252,10 +264,16 @@ const NavCompBase = new UICompBuilder(childrenMap, (props) => {
           </Section>
         )}
 
-        {(useContext(EditorContext).editorModeStatus === "layout" || useContext(EditorContext).editorModeStatus === "both") && (
-          <Section name={sectionNames.style}>
-            {children.style.getPropertyView()}
-          </Section>
+        {(useContext(EditorContext).editorModeStatus === "layout" ||
+          useContext(EditorContext).editorModeStatus === "both") && (
+          <>
+            <Section name={sectionNames.style}>
+              {children.style.getPropertyView()}
+            </Section>
+            <Section name={sectionNames.animationStyle} hasTooltip={true}>
+              {children.animationStyle.getPropertyView()}
+            </Section>
+          </>
         )}
       </>
     );

@@ -1,18 +1,19 @@
-import { JSONValue } from "util/jsonTypes";
-import { ExtraActionType } from "lowcoder-core";
-import { CommonSettingResponseData } from "api/commonSettingApi";
-import { PermissionItem } from "../components/PermissionDialog/PermissionList";
-import { UiLayoutType } from "comps/comps/uiComp";
+import type { JSONValue } from "util/jsonTypes";
+import type { ExtraActionType } from "lowcoder-core";
+import type { CommonSettingResponseData } from "api/commonSettingApi";
+import type { PermissionItem } from "../components/PermissionDialog/PermissionList";
+import type { UiLayoutType } from "comps/comps/uiComp";
 
 // To be same with HomeResTypeEnum
 export enum AppTypeEnum {
   Application = 1,
   Module = 2,
   NavLayout = 3,
-  // 4 folder, 5 mobile
   MobileTabLayout = 6,
+  // Folder = 4,
+  // Mobile = 5,
   // WorkflowScreen = 7,
-  // Slide = 8,
+  // Bundle = 8,
 }
 
 export enum ApplicationCategoriesEnum {
@@ -91,6 +92,8 @@ export interface ApplicationMeta {
   folder: false;
   isLocalMarketplace?: boolean;
   applicationStatus: "NORMAL" | "RECYCLED" | "DELETED";
+  editingUserId: string | null;
+  lastEditedAt: number;
 }
 
 export interface FolderMeta {
@@ -130,7 +133,8 @@ export interface AppPermissionInfo {
   publicToMarketplace: boolean;
 }
 
-export type AppViewMode = "edit" | "preview" | "view" | "view_marketplace";
+// adding viewMode for marketplace and adminMode for Admin area use
+export type AppViewMode = "edit" | "preview" | "view" | "view_marketplace" | "admin";
 
 export type AppPathParams = {
   viewMode: AppViewMode;

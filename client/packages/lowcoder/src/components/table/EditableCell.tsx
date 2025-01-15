@@ -1,12 +1,12 @@
 import { PresetStatusColorType } from "antd/es/_util/colors";
 import _ from "lodash";
 import { changeChildAction, DispatchType } from "lowcoder-core";
-import { constantColors } from "lowcoder-design";
 import React, { ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { JSONValue } from "util/jsonTypes";
 import ColumnTypeView from "./columnTypeView";
 import { TableCellContext } from "comps/comps/tableComp/tableContext";
+import Tooltip from "antd/es/tooltip";
 
 type StatusType = PresetStatusColorType | "none";
 export const TABLE_EDITABLE_SWITCH_ON = true;
@@ -25,8 +25,8 @@ const EditableChip = styled.div`
   height: 0px;
   border: 4.5px solid transparent;
   border-radius: 2px;
-  border-top-color: ${constantColors[1].color};
-  border-right-color: ${constantColors[1].color};
+  border-top-color: #5589F2;
+  border-right-color: #5589F2;
 `;
 
 export interface CellProps {
@@ -35,6 +35,8 @@ export interface CellProps {
   candidateTags?: string[];
   candidateStatus?: { text: string; status: StatusType }[];
   textOverflow?: boolean;
+  cellTooltip?: string;
+  editMode?: string;
   onTableEvent?: (eventName: any) => void;
 }
 
@@ -54,6 +56,25 @@ const BorderDiv = styled.div`
   left: 0;
 `;
 
+const CellWrapper = ({
+  children,
+  tooltipTitle,
+}: {
+  children: ReactNode,
+  tooltipTitle?: string,
+}) => {
+  if (tooltipTitle) {
+    return (
+      <Tooltip title={tooltipTitle} placement="topLeft">
+        {children}
+      </Tooltip>
+    )
+  }
+  return (
+    <>{children}</>
+  )
+};
+
 interface EditableCellProps<T> extends CellProps {
   normalView: ReactNode;
   dispatch: DispatchType;
@@ -71,24 +92,29 @@ export function EditableCell<T extends JSONValue>(props: EditableCellProps<T>) {
     changeValue,
     baseValue,
     candidateTags,
+    // tagColors
     candidateStatus,
+    editMode,
     onTableEvent,
   } = props;
   const status = _.isNil(changeValue) ? "normal" : "toSave";
   const editable = editViewFn ? props.editable : false;
   const { isEditing, setIsEditing } = useContext(TableCellContext);
   const value = changeValue ?? baseValue!;
-
   const [tmpValue, setTmpValue] = useState<T | null>(value);
+  const singleClickEdit = editMode === 'single'; 
+
   useEffect(() => {
     setTmpValue(value);
-  }, [value]);
+  }, [JSON.stringify(value)]);
+
   const onChange = useCallback(
     (value: T) => {
       setTmpValue(value);
     },
     [setTmpValue]
   );
+
   const onChangeEnd = useCallback(() => {
     setIsEditing(false);
     dispatch(
@@ -101,11 +127,13 @@ export function EditableCell<T extends JSONValue>(props: EditableCellProps<T>) {
     if(!_.isEqual(tmpValue, value)) {
       onTableEvent?.('columnEdited');
     }
-  }, [dispatch, baseValue, tmpValue]);
+  }, [dispatch, JSON.stringify(baseValue), JSON.stringify(tmpValue)]);
+
   const editView = useMemo(
     () => editViewFn?.({ value, onChange, onChangeEnd }) ?? <></>,
-    [editViewFn, value, onChange, onChangeEnd]
+    [editViewFn, JSON.stringify(value), onChange, onChangeEnd]
   );
+
   const enterEditFn = useCallback(() => {
     if (editable) setIsEditing(true);
   }, [editable]);
@@ -113,24 +141,48 @@ export function EditableCell<T extends JSONValue>(props: EditableCellProps<T>) {
   if (isEditing) {
     return (
       <>
-        <BorderDiv />
+        <BorderDiv className="editing-border" />
         <TagsContext.Provider value={candidateTags ?? []}>
-          <StatusContext.Provider value={candidateStatus ?? []}>{editView}</StatusContext.Provider>
+          <StatusContext.Provider value={candidateStatus ?? []}>
+            <div className="editing-wrapper">
+              {editView}
+            </div>
+          </StatusContext.Provider>
         </TagsContext.Provider>
       </>
     );
   }
-
+  
   return (
-    <ColumnTypeView
-      textOverflow={props.textOverflow}
-    >
-      {status === "toSave" && !isEditing && <EditableChip />}
-      <div
-        onDoubleClick={enterEditFn}
+      <ColumnTypeView
+        textOverflow={props.textOverflow}
       >
-        {normalView}
-      </div>
-    </ColumnTypeView>
+        {status === "toSave" && !isEditing && <EditableChip />}
+        <CellWrapper tooltipTitle={props.cellTooltip}>
+          <div
+            tabIndex={editable ? 0 : -1 }
+            onFocus={enterEditFn}
+          >
+            {normalView}
+          </div>
+        </CellWrapper>
+        {/* overlay on normal view to handle double click for editing */}
+        {editable && (
+          <CellWrapper tooltipTitle={props.cellTooltip}>
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+              }}
+              onDoubleClick={!singleClickEdit ? enterEditFn : undefined}
+              onClick={singleClickEdit ? enterEditFn : undefined}
+            >
+            </div>
+          </CellWrapper>
+        )}
+      </ColumnTypeView>
   );
 }

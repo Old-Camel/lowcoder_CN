@@ -1,4 +1,4 @@
-import { Rule } from "antd/lib/form";
+import { Rule } from "antd/es/form";
 import { HttpConfig, OAuthConfig } from "api/datasourceApi";
 import {
   DatasourceForm,
@@ -24,7 +24,7 @@ import { useHostCheck } from "./useHostCheck";
 import { useSelector } from "react-redux";
 import { getUser } from "redux/selectors/usersSelectors";
 
-const AuthTypeOptions = [
+export const AuthTypeOptions = [
   { label: "None", value: "NO_AUTH" },
   { label: "Basic", value: "BASIC_AUTH" },
   { label: "Digest", value: "DIGEST_AUTH" },

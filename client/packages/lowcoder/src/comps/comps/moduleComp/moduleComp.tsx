@@ -68,7 +68,7 @@ type UpdateDslAction = {
   moduleDsl: Record<string, DSLType>;
 };
 
-type ModuleReadyAction = {
+export type ModuleReadyAction = {
   type: "moduleReady";
   comp: RootComp;
 };
@@ -85,6 +85,7 @@ const childrenMap = {
   events: eventHandlerControl(),
   autoHeight: AutoHeightControl,
   scrollbars: withDefault(BoolControl, false),
+  loadModuleInDomWhenHide: withDefault(BoolControl, true),
 };
 
 type DataType = ToDataType<ToInstanceType<typeof childrenMap>>;
@@ -123,10 +124,13 @@ class ModuleTmpComp extends ModuleCompBase {
         )}
         <Section name={sectionNames.layout}>
           {!this.autoScaleCompHeight() && this.children.autoHeight.getPropertyView()}
-          {this.children.scrollbars.propertyView({
+          {!this.autoScaleCompHeight() && this.children.scrollbars.propertyView({
             label: trans("prop.scrollbar"),
           })}
           {hiddenPropertyView(this.children)}
+          {this.children.hidden.getView() && this.children.loadModuleInDomWhenHide.propertyView({
+            label: "Load module in DOM when hidden",
+          })}
         </Section>
       </>
     );
@@ -263,7 +267,6 @@ class ModuleTmpComp extends ModuleCompBase {
 
   override reduce(action: CompAction<JSONValue>): this {
     const appId = this.children.appId.getView();
-
     // init
     if (isMyCustomAction<InitAction>(action, "init")) {
       if (getReduceContext().disableUpdateState) return this;
@@ -526,12 +529,15 @@ const ModuleCompWithView = withViewFn(ModuleTmpComp, (comp) => {
   if (error) {
     return <Placeholder>{error}</Placeholder>;
   }
+  if (comp.children.hidden.getView() && !comp.children.loadModuleInDomWhenHide.getView()) {
+    return null;
+  }
 
   let content: ReactNode = appId ? <ModuleLoading /> : <Placeholder />;
   if (comp.moduleRootComp && comp.isReady) {
     content = (
       <Wrapper className="module-wrapper">
-        <ScrollBar style={{ height: comp.autoHeight() ? "100%" : "auto", margin: "0px", padding: "0px" }} hideScrollbar={!scrollbars}>
+        <ScrollBar style={{ height: comp.autoHeight() ? "100%" : "100%", margin: "0px", padding: "0px" }} hideScrollbar={!scrollbars}>
           <ExternalEditorContext.Provider value={moduleExternalState}>
            {comp.moduleRootComp.getView()}
           </ExternalEditorContext.Provider>

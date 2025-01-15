@@ -9,7 +9,7 @@ import {
 } from "comps/controls/codeControl";
 import { stringExposingStateControl } from "comps/controls/codeStateControl";
 import { LabelControl } from "comps/controls/labelControl";
-import { ColorPickerStyleType, InputLikeStyleType } from "comps/controls/styleControlConstants";
+import {ColorPickerStyleType, InputLikeStyleType, LabelStyleType, heightCalculator, widthCalculator } from "comps/controls/styleControlConstants";
 import { Section, sectionNames, ValueFromOption } from "lowcoder-design";
 import _ from "lodash";
 import { css } from "styled-components";
@@ -156,6 +156,7 @@ export const textInputChildren = {
 
   // validation
   required: BoolControl,
+  showValidationWhenEmpty: BoolControl,
   minLength: NumberControl,
   maxLength: NumberControl,
   validationType: dropdownControl(TextInputValidationOptions, "Text"),
@@ -238,6 +239,7 @@ export const TextInputInteractionSection = (children: TextInputComp) => (
 export const TextInputValidationSection = (children: TextInputComp) => (
   <Section name={sectionNames.validation}>
     {requiredPropertyView(children)}
+    {children.showValidationWhenEmpty.propertyView({label: trans("prop.showEmptyValidation")})}
     {children.validationType.propertyView({ label: trans("prop.textType") })}
     {valueInfoMap[children.validationType.getView()]?.extra === undefined &&
       regexPropertyView(children)}
@@ -247,7 +249,7 @@ export const TextInputValidationSection = (children: TextInputComp) => (
   </Section>
 );
 
-export function getStyle(style: InputLikeStyleType) {
+export function getStyle(style: InputLikeStyleType, labelStyle?: LabelStyleType) {
   return css`
     border-radius: ${style.radius};
     border-width: ${style.borderWidth};
@@ -264,6 +266,7 @@ export function getStyle(style: InputLikeStyleType) {
       text-decoration:${style.textDecoration};
       background-color: ${style.background};
       border-color: ${style.border};
+      // line-height: ${style.lineHeight};
 
       &:focus,
       &.ant-input-affix-wrapper-focused {

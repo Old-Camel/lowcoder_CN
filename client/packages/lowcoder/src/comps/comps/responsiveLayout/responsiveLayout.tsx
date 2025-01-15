@@ -9,8 +9,10 @@ import { styleControl } from "comps/controls/styleControl";
 import {
   ResponsiveLayoutRowStyle,
   ResponsiveLayoutRowStyleType,
+  ResponsiveLayoutColStyle,
   ResponsiveLayoutColStyleType,
-  ResponsiveLayoutColStyle
+  AnimationStyle,
+  AnimationStyleType
 } from "comps/controls/styleControlConstants";
 import { sameTypeMap, UICompBuilder, withDefault } from "comps/generators";
 import { addMapChildAction } from "comps/generators/sameTypeMap";
@@ -19,7 +21,7 @@ import { NameGenerator } from "comps/utils";
 import { Section, controlItem, sectionNames } from "lowcoder-design";
 import { HintPlaceHolder } from "lowcoder-design";
 import _ from "lodash";
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { IContainer } from "../containerBase/iContainer";
 import { SimpleContainerComp } from "../containerBase/simpleContainerComp";
@@ -31,24 +33,40 @@ import {
 } from "../containerComp/containerView";
 import { BackgroundColorContext } from "comps/utils/backgroundColorContext";
 import { trans } from "i18n";
-import { messageInstance } from "lowcoder-design";
+import { messageInstance } from "lowcoder-design/src/components/GlobalInstances";
 import { BoolControl } from "comps/controls/boolControl";
-import { NumberControl } from "comps/controls/codeControl";
+import { BoolCodeControl, NumberControl } from "comps/controls/codeControl";
 
 import { useContext } from "react";
 import { EditorContext } from "comps/editorState";
 
-const RowWrapper = styled(Row)<{$style: ResponsiveLayoutRowStyleType}>`
+import { disabledPropertyView, hiddenPropertyView } from "comps/utils/propertyUtils";
+import { DisabledContext } from "comps/generators/uiCompBuilder";
+import SliderControl from "@lowcoder-ee/comps/controls/sliderControl";
+import { getBackgroundStyle } from "@lowcoder-ee/util/styleUtils";
+
+const RowWrapper = styled(Row)<{
+  $style: ResponsiveLayoutRowStyleType;
+  $animationStyle: AnimationStyleType;
+  $showScrollbar:boolean
+}>`
+  ${(props) => props.$animationStyle}
   height: 100%;
-  border: 1px solid ${(props) => props.$style.border};
-  border-radius: ${(props) => props.$style.radius};
+  border-radius: ${(props) => props.$style?.radius};
+  border-width: ${(props) => props.$style?.borderWidth};
+  border-color: ${(props) => props.$style?.border};
+  border-style: ${(props) => props.$style?.borderStyle};
   padding: ${(props) => props.$style.padding};
-  background-color: ${(props) => props.$style.background};
-  overflow-x: auto;
+  rotate: ${props=> props.$style.rotation}
+  overflow: ${(props) => (props.$showScrollbar ? 'auto' : 'hidden')};
+   ::-webkit-scrollbar {
+    display: ${(props) => (props.$showScrollbar ? 'block' : 'none')};
+    }
+  ${props => getBackgroundStyle(props.$style)}
 `;
 
 const ColWrapper = styled(Col)<{
-  $style: ResponsiveLayoutColStyleType,
+  $style: ResponsiveLayoutColStyleType | undefined,
   $minWidth?: string,
   $matchColumnsHeight: boolean,
 }>`
@@ -59,20 +77,31 @@ const ColWrapper = styled(Col)<{
 
   > div {
     height: ${(props) => props.$matchColumnsHeight ? '100%' : 'auto'};
+    border-radius: ${(props) => props.$style?.radius};
+    border-width: ${(props) => props.$style?.borderWidth}px;
+    border-color: ${(props) => props.$style?.border};
+    border-style: ${(props) => props.$style?.borderStyle};
+    margin: ${(props) => props.$style?.margin};
+    padding: ${(props) => props.$style?.padding};
+    ${props => props.$style && getBackgroundStyle(props.$style)}
   }
 `;
 
-const childrenMap = {
+const childrenMap = { 
+  disabled: BoolCodeControl,
   columns: ColumnOptionControl,
   containers: withDefault(sameTypeMap(SimpleContainerComp), {
     0: { view: {}, layout: {} },
     1: { view: {}, layout: {} },
   }),
+  horizontalGridCells: SliderControl,
   autoHeight: AutoHeightControl,
   rowBreak: withDefault(BoolControl, false),
   matchColumnsHeight: withDefault(BoolControl, true),
-  rowStyle: withDefault(styleControl(ResponsiveLayoutRowStyle), {}),
-  columnStyle: withDefault(styleControl(ResponsiveLayoutColStyle), {}),
+  style: styleControl(ResponsiveLayoutRowStyle , 'style'),
+  columnStyle: styleControl(ResponsiveLayoutColStyle , 'columnStyle'),
+  mainScrollbar: withDefault(BoolControl, false),
+  animationStyle:styleControl(AnimationStyle , 'animationStyle'),
   columnPerRowLG: withDefault(NumberControl, 4),
   columnPerRowMD: withDefault(NumberControl, 2),
   columnPerRowSM: withDefault(NumberControl, 1),
@@ -106,75 +135,69 @@ const ResponsiveLayout = (props: ResponsiveLayoutProps) => {
     dispatch,
     rowBreak,
     matchColumnsHeight,
-    rowStyle,
+    style,
     columnStyle,
     columnPerRowLG,
     columnPerRowMD,
     columnPerRowSM,
     verticalSpacing,
     horizontalSpacing,
+    animationStyle,
+    horizontalGridCells,
+    mainScrollbar,
+    autoHeight
   } = props;
 
   return (
-    <BackgroundColorContext.Provider value={props.rowStyle.background}>
-      <div style={{padding: rowStyle.margin, height: '100%'}}>
-        <RowWrapper
-          $style={rowStyle}
-          wrap={rowBreak}
-          gutter={[horizontalSpacing, verticalSpacing]}
-        >
-          {columns.map(column => {
-            const id = String(column.id);
-            const childDispatch = wrapDispatch(wrapDispatch(dispatch, "containers"), id);
-            if(!containers[id]) return null
-            const containerProps = containers[id].children;
-
-            const columnCustomStyle = {
-              margin: !_.isEmpty(column.margin) ? column.margin : columnStyle.margin,
-              padding: !_.isEmpty(column.padding) ? column.padding : columnStyle.padding,
-              radius: !_.isEmpty(column.radius) ? column.radius : columnStyle.radius,
-              border: `1px solid ${!_.isEmpty(column.border) ? column.border : columnStyle.border}`,
-              background: !_.isEmpty(column.background) ? column.background : columnStyle.background,
+    <BackgroundColorContext.Provider value={props.style.background}>
+      <DisabledContext.Provider value={props.disabled}>
+        <div style={{padding: style.margin, height: '100%'}}>
+          <RowWrapper
+            $style={style}
+            $animationStyle={animationStyle}
+            $showScrollbar={mainScrollbar}
+            wrap={rowBreak}
+            gutter={[horizontalSpacing, verticalSpacing]}
+          >
+            {columns.map(column => {
+              const id = String(column.id);
+              const childDispatch = wrapDispatch(wrapDispatch(dispatch, "containers"), id);
+              if(!containers[id]) return null
+              const containerProps = containers[id].children;
+              const noOfColumns = columns.length;
+              return (
+                <ColWrapper
+                  key={id}
+                  lg={24/(noOfColumns < columnPerRowLG ? noOfColumns : columnPerRowLG)}
+                  md={24/(noOfColumns < columnPerRowMD ? noOfColumns : columnPerRowMD)}
+                  sm={24/(noOfColumns < columnPerRowSM ? noOfColumns : columnPerRowSM)}
+                  xs={24/(noOfColumns < columnPerRowSM ? noOfColumns : columnPerRowSM)}
+                  $style={props.columnStyle}
+                  $minWidth={column.minWidth}
+                  $matchColumnsHeight={matchColumnsHeight}
+                >
+                  <ColumnContainer
+                    layout={containerProps.layout.getView()}
+                    items={gridItemCompToGridItems(containerProps.items.getView())}
+                    positionParams={containerProps.positionParams.getView()}
+                    dispatch={childDispatch}
+                    autoHeight={props.autoHeight}
+                    horizontalGridCells={horizontalGridCells}
+                    style={columnStyle}
+                  />
+                </ColWrapper>
+              )
+              })
             }
-            const noOfColumns = columns.length;
-            let backgroundStyle = columnCustomStyle.background;
-            if(!_.isEmpty(column.backgroundImage))  {
-              backgroundStyle = `center / cover url('${column.backgroundImage}') no-repeat, ${backgroundStyle}`;
-            }
-            return (
-              <ColWrapper
-                key={id}
-                lg={24/(noOfColumns < columnPerRowLG ? noOfColumns : columnPerRowLG)}
-                md={24/(noOfColumns < columnPerRowMD ? noOfColumns : columnPerRowMD)}
-                sm={24/(noOfColumns < columnPerRowSM ? noOfColumns : columnPerRowSM)}
-                xs={24/(noOfColumns < columnPerRowSM ? noOfColumns : columnPerRowSM)}
-                $style={columnCustomStyle}
-                $minWidth={column.minWidth}
-                $matchColumnsHeight={matchColumnsHeight}
-              >
-                <ColumnContainer
-                  layout={containerProps.layout.getView()}
-                  items={gridItemCompToGridItems(containerProps.items.getView())}
-                  positionParams={containerProps.positionParams.getView()}
-                  dispatch={childDispatch}
-                  autoHeight={props.autoHeight}
-                  style={{
-                    ...columnCustomStyle,
-                    background: backgroundStyle,
-                  }}
-                />
-              </ColWrapper>
-            )
-            })
-          }
-        </RowWrapper>
-      </div>
+          </RowWrapper>
+        </div>
+        </DisabledContext.Provider>
     </BackgroundColorContext.Provider>
   );
 };
 
 export const ResponsiveLayoutBaseComp = (function () {
-  return new UICompBuilder(childrenMap, (props, dispatch) => {
+  return new UICompBuilder(childrenMap, (props, dispatch) => {  
     return (
       <ResponsiveLayout {...props} dispatch={dispatch} />
     );
@@ -189,10 +212,23 @@ export const ResponsiveLayoutBaseComp = (function () {
             })}
           </Section>
 
+          {(useContext(EditorContext).editorModeStatus === "logic" || useContext(EditorContext).editorModeStatus === "both") && (
+            <Section name={sectionNames.interaction}>
+              {disabledPropertyView(children)}
+              {hiddenPropertyView(children)}
+            </Section>
+          )}
+
           {["layout", "both"].includes(useContext(EditorContext).editorModeStatus) && (
             <>
             <Section name={sectionNames.layout}>
               {children.autoHeight.getPropertyView()}
+              {(!children.autoHeight.getView()) && children.mainScrollbar.propertyView({
+                label: trans("prop.mainScrollbar")
+              })}
+              {children.horizontalGridCells.propertyView({
+                label: trans('prop.horizontalGridCells'),
+              })}
             </Section>
             <Section name={trans("responsiveLayout.rowLayout")}>
               {children.rowBreak.propertyView({
@@ -230,10 +266,13 @@ export const ResponsiveLayoutBaseComp = (function () {
               })}
             </Section>
             <Section name={trans("responsiveLayout.rowStyle")}>
-              {children.rowStyle.getPropertyView()}
+              {children.style.getPropertyView()}
             </Section>
             <Section name={trans("responsiveLayout.columnStyle")}>
               {children.columnStyle.getPropertyView()}
+            </Section>
+            <Section name={sectionNames.animationStyle} hasTooltip={true}>
+                {children.animationStyle.getPropertyView()}
             </Section>
             </>
           )}

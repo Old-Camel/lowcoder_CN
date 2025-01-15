@@ -9,11 +9,11 @@ import { trans } from "i18n";
 import { ChangeEventHandlerControl } from "comps/controls/eventHandlerControl";
 import { formDataChildren, FormDataPropertyView } from "./formComp/formDataConstants";
 import { PositionControl } from "comps/controls/dropdownControl";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactResizeDetector from "react-resize-detector";
 import { ArrayStringControl } from "comps/controls/codeControl";
 import { styleControl } from "comps/controls/styleControl";
-import { CarouselStyle } from "comps/controls/styleControlConstants";
+import { AnimationStyle, AnimationStyleType, CarouselStyle } from "comps/controls/styleControlConstants";
 
 import { useContext } from "react";
 import { EditorContext } from "comps/editorState";
@@ -25,11 +25,12 @@ const CarouselItem = styled.div<{ $src: string }>`
   background-size: contain;
 `;
 
-const Container = styled.div<{ $bg: string }>`
+const Container = styled.div<{$bg: string; $animationStyle:AnimationStyleType}>`
   &,
   .ant-carousel {
     height: 100%;
-    background-color: ${(props) => props.$bg};
+    background: ${(props) => props.$bg};
+    ${props=>props.$animationStyle}
   }
 `;
 
@@ -43,9 +44,10 @@ let CarouselBasicComp = (function () {
     onEvent: ChangeEventHandlerControl,
     showDots: withDefault(BoolControl, true),
     dotPosition: withDefault(PositionControl, "bottom"),
-    style: styleControl(CarouselStyle),
     fade: BoolControl,  // added by mousheng
 
+    style: styleControl(CarouselStyle , 'style'),
+    animationStyle: styleControl(AnimationStyle , 'animationStyle'),
     ...formDataChildren,
   };
   return new UICompBuilder(childrenMap, (props) => {
@@ -57,7 +59,11 @@ let CarouselBasicComp = (function () {
       }
     };
     return (
-      <Container ref={containerRef} $bg={props.style.background}>
+      <Container
+        ref={containerRef}
+        $bg={props.style.background}
+        $animationStyle={props.animationStyle}
+      >
         <ReactResizeDetector onResize={onResize}>
           <Carousel
             dots={props.showDots}
@@ -102,6 +108,9 @@ let CarouselBasicComp = (function () {
               </Section>
               <Section name={sectionNames.style}>
                 {children.style.getPropertyView()}
+              </Section>
+              <Section name={sectionNames.animationStyle} hasTooltip={true}>
+                {children.animationStyle.getPropertyView()}
               </Section>
             </>
           )}

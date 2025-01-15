@@ -1,35 +1,26 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.1</version>
-        <relativePath /> <!-- lookup parent from repository -->
-    </parent>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.lowcoder</groupId>
+	<artifactId>lowcoder-root</artifactId>
+	<packaging>pom</packaging>
+	<name>lowcoder-root</name>
+	<version>${revision}</version>
 
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>org.lowcoder</groupId>
-    <artifactId>lowcoder-root</artifactId>
-    <version>${revision}</version>
-    <packaging>pom</packaging>
-    <name>lowcoder-root</name>
 
-    <properties>
-        <revision>2.3.0-SNAPSHOT</revision>
-        <java.version>17</java.version>
-        <javadoc.disabled>true</javadoc.disabled>
-        <deploy.disabled>true</deploy.disabled>
-        <source.disabled>true</source.disabled>
-        <project.groupId>org.lowcoder</project.groupId>
-        <project.version>1.0-SNAPSHOT</project.version>
-        <skipDockerBuild>true</skipDockerBuild>
-        <log4j2.version>2.17.0</log4j2.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-    </properties>
+	<properties>
+		<revision>2.5.3</revision>
+		<java.version>17</java.version>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<javadoc.disabled>true</javadoc.disabled>
+		<deploy.disabled>true</deploy.disabled>
+		<source.disabled>true</source.disabled>
+		<skipDockerBuild>true</skipDockerBuild>
+	</properties>
 
     <repositories>
         <repository>
@@ -44,101 +35,127 @@
     </repositories>
 
 
-    <profiles>
-        <profile>
-            <id>cloud</id>
-            <properties>
-                <profiles.active>cloud</profiles.active>
-            </properties>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <resources>
-                    <resource>
-                        <filtering>false</filtering>
-                        <directory>src/main/java</directory>
-                        <excludes>
-                            <exclude>**/*.java</exclude>
-                        </excludes>
-                    </resource>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                        <excludes>
-                            <exclude>**/selfhost/application*.yml</exclude>
-                        </excludes>
-                    </resource>
-                </resources>
-            </build>
-        </profile>
-        <profile>
-            <id>selfhost</id>
-            <properties>
-                <profiles.active>selfhost</profiles.active>
-            </properties>
-            <build>
-                <resources>
-                    <resource>
-                        <filtering>false</filtering>
-                        <directory>src/main/java</directory>
-                        <excludes>
-                            <exclude>**/*.java</exclude>
-                        </excludes>
-                    </resource>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                        <excludes>
-                            <exclude>**/application*.yml</exclude>
-                        </excludes>
-                    </resource>
-                </resources>
-            </build>
-        </profile>
-    </profiles>
+	<profiles>
+		<profile>
+			<id>cloud</id>
+			<properties>
+				<profiles.active>cloud</profiles.active>
+			</properties>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<resources>
+					<resource>
+						<filtering>false</filtering>
+						<directory>src/main/java</directory>
+						<excludes>
+							<exclude>**/*.java</exclude>
+						</excludes>
+					</resource>
+					<resource>
+						<directory>src/main/resources</directory>
+						<excludes>
+							<exclude>**/selfhost/application*.yml</exclude>
+						</excludes>
+					</resource>
+				</resources>
+			</build>
+		</profile>
+		<profile>
+			<id>selfhost</id>
+			<properties>
+				<profiles.active>selfhost</profiles.active>
+			</properties>
+			<build>
+				<resources>
+					<resource>
+						<filtering>false</filtering>
+						<directory>src/main/java</directory>
+						<excludes>
+							<exclude>**/*.java</exclude>
+						</excludes>
+					</resource>
+					<resource>
+						<directory>src/main/resources</directory>
+						<excludes>
+							<exclude>**/application*.yml</exclude>
+						</excludes>
+					</resource>
+				</resources>
+			</build>
+		</profile>
+	</profiles>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>2.0.0</version>
-            </plugin>
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.1.2</version>
-            </plugin>
-        </plugins>
-    </build>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<version>2.4.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.6.1</version>
+			</plugin>
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.13.0</version>
+					<configuration>
+						<source>${java.version}</source>
+						<target>${java.version}</target>
+						<compilerArgs>
+							<arg>-parameters</arg>
+						</compilerArgs>
+					</configuration>
+				</plugin>
 
-    <dependencyManagement>
-        <dependencies>
+				<plugin>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>3.6.0</version>
+					<configuration>
+						<descriptors>
+							<descriptor>src/assembly/bin.xml</descriptor>
+						</descriptors>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 
-            <dependency>
-                <groupId>org.lowcoder</groupId>
-                <artifactId>lowcoder-sdk</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.lowcoder</groupId>
-                <artifactId>lowcoder-infra</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.lowcoder</groupId>
-                <artifactId>lowcoder-domain</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.lowcoder</groupId>
-                <artifactId>lowcoder-plugins</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.lowcoder</groupId>
-                <artifactId>lowcoder-server</artifactId>
-                <version>${revision}</version>
-            </dependency>
+	</build>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.lowcoder</groupId>
+				<artifactId>lowcoder-sdk</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.lowcoder</groupId>
+				<artifactId>lowcoder-infra</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.lowcoder</groupId>
+				<artifactId>lowcoder-domain</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.lowcoder</groupId>
+				<artifactId>lowcoder-plugins</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.lowcoder</groupId>
+				<artifactId>lowcoder-server</artifactId>
+				<version>${revision}</version>
+			</dependency>
             <dependency>
                 <groupId>org.pf4j</groupId>
                 <artifactId>pf4j</artifactId>
@@ -327,14 +344,16 @@
                 <version>2.0.1.Final</version>
             </dependency>
         </dependencies>
-    </dependencyManagement>
+	</dependencyManagement>
 
-    <modules>
-        <module>lowcoder-sdk</module>
-        <module>lowcoder-infra</module>
-        <module>lowcoder-domain</module>
-        <module>lowcoder-plugins</module>
-        <module>lowcoder-server</module>
-    </modules>
+	<modules>
+		<module>lowcoder-dependencies</module>
+		<module>lowcoder-sdk</module>
+		<module>lowcoder-infra</module>
+		<module>lowcoder-domain</module>
+		<module>lowcoder-plugins</module>
+		<module>lowcoder-server</module>
+	</modules>
 
 </project>
+
