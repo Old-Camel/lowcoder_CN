@@ -75,7 +75,7 @@ WORKDIR /lowcoder/node-service/app/
 # 清理并重新安装依赖
 RUN rm -rf node_modules yarn.lock \
     && npm cache clean --force \
-    && yarn install --network-timeout 1000000 \
+    && yarn install \
     && sed -i 's/"build": "rm -rf build\/ && yarn test && tsc && yarn copy"/"build": "rm -rf build\/ && tsc && yarn copy"/' package.json \
     && cd node_modules/duckdb \
     && npm rebuild \
@@ -132,8 +132,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certifi
 # Build client
 COPY ./client /lowcoder-client
 WORKDIR /lowcoder-client
-RUN yarn config set registry https://registry.npmmirror.com \
-    && yarn install --network-timeout 300000
+RUN  yarn install
 
 ARG REACT_APP_COMMIT_ID=test
 ARG REACT_APP_ENV=production
