@@ -79,7 +79,7 @@ export function SettingHome() {
 
     // Premium features
 
-    {
+    /* {
       key: SettingPageEnum.Environments,
       label: (
         <span>
@@ -88,8 +88,8 @@ export function SettingHome() {
         </span>
       ),
       disabled: true,
-    },
-    {
+    }, */
+   /*  {
       key: SettingPageEnum.AppUsage,
       label: (
         <span>
@@ -98,8 +98,8 @@ export function SettingHome() {
         </span>
       ),
       disabled: true,
-    },
-    {
+    }, */
+  /*   {
       key: SettingPageEnum.Audit,
       label: (
         <span>
@@ -109,9 +109,9 @@ export function SettingHome() {
           )}
         </span>
       ),
-      disabled: !showAuditLog(config) || !currentOrgAdmin(user),
-    },
-    {
+      disabled: false,
+    }, */
+ /*    {
       key: SettingPageEnum.Branding,
       label: (
         <span>
@@ -129,7 +129,7 @@ export function SettingHome() {
         !currentOrgAdmin(user) ||
         !enableCustomBrand(config) ||
         (!isSelfDomain(config) && !isEnterpriseMode(config)),
-    },
+    }, */
     { 
       key: SettingPageEnum.Subscription,
       label: trans("settings.subscription"),
@@ -147,13 +147,13 @@ export function SettingHome() {
             mode="inline"
             selectedKeys={[selectKey]}
             onClick={(value) => {
-              history.push("/setting/" + value.key);
-            } }
+              history.push("/backstage/bluesky/setting/" + value.key);
+            }}
             items={items} />
 
-          <Card style={{marginTop: "40px", color:"#aaa"}}>
+{/*           <Card style={{marginTop: "40px", color:"#aaa"}}>
             <div>If you are interested in early access to the upcoming Enterprise Edition, please contact us: <a href="mailto:service@lowcoder.cloud">service@lowcoder.cloud</a></div>
-          </Card>
+          </Card> */}
         </SubSideBar>
         {selectKey === SettingPageEnum.UserGroups && <PermissionSetting />}
         {selectKey === SettingPageEnum.Organization && <Organization />}

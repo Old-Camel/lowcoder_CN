@@ -170,9 +170,10 @@ export default function ApplicationHome() {
                   routePath: NEWS_URL,
                   routeComp: NewsView,
                   icon: ({ selected, ...otherProps }) => selected ? <NewsIcon {...otherProps} width={"24px"}/> : <NewsIcon {...otherProps} width={"24px"}/>,
-                  visible: ({ user }) => user.orgDev,
+                  visible: ({ user }) => false,
                   style: { color: "red" },
                   mobileVisible: false,
+
                 },
                 {
                   text: <TabLabel>{trans("home.orgHome")}</TabLabel>,
@@ -190,6 +191,8 @@ export default function ApplicationHome() {
                   routeComp: MarketplaceView,
                   icon: ({ selected, ...otherProps }) => selected ? <MarketplaceIcon {...otherProps} width={"24px"}/> : <MarketplaceIcon {...otherProps} width={"24px"}/>,
                   mobileVisible: false,
+                  visible: ({ user }) => false,
+
                 },
               ]
             },
