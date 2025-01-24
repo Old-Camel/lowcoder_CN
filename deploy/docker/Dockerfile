@@ -136,9 +136,7 @@ COPY ./client /lowcoder-client
 WORKDIR /lowcoder-client
 
 # 修改 yarn 配置方式
-RUN  yarn config set npmRegistryServer https://registry.npmmirror.com && \
-    rm -rf node_modules yarn.lock && \
-    yarn install
+RUN yarn install
 
 ARG REACT_APP_COMMIT_ID=test
 ARG REACT_APP_ENV=production
