@@ -76,6 +76,7 @@ WORKDIR /lowcoder/node-service/app/
 RUN rm -rf node_modules yarn.lock \
     && npm cache clean --force \
     && yarn install \
+    && yarn add @apidevtools/json-schema-ref-parser@9.0.9 @apidevtools/swagger-parser@10.1.0 --exact \
     && sed -i 's/"build": "rm -rf build\/ && yarn test && tsc && yarn copy"/"build": "rm -rf build\/ && tsc && yarn copy"/' package.json \
     && cd node_modules/duckdb \
     && npm rebuild \

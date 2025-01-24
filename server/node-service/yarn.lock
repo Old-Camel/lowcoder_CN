@@ -44,7 +44,7 @@ __metadata:
   version: 10.1.0
   resolution: "@apidevtools/swagger-parser@npm:10.1.0"
   dependencies:
-    "@apidevtools/json-schema-ref-parser": 9.0.6
+    "@apidevtools/json-schema-ref-parser": 9.0.9
     "@apidevtools/openapi-schemas": ^2.1.0
     "@apidevtools/swagger-methods": ^3.0.2
     "@jsdevtools/ono": ^7.1.3
