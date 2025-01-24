@@ -132,14 +132,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certifi
 # Build client
 COPY ./client /lowcoder-client
 WORKDIR /lowcoder-client
-RUN yarn --immutable
+RUN yarn config set registry https://registry.npmmirror.com \
+    && yarn install --network-timeout 300000
 
 ARG REACT_APP_COMMIT_ID=test
 ARG REACT_APP_ENV=production
 ARG REACT_APP_EDITION=community
 ARG REACT_APP_DISABLE_JS_SANDBOX=true
 
-RUN  yarn build 
+RUN yarn build 
 
 # Build lowcoder-comps
 WORKDIR /lowcoder-client/packages/lowcoder-comps
