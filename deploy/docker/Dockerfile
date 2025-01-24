@@ -136,8 +136,7 @@ COPY ./client /lowcoder-client
 WORKDIR /lowcoder-client
 
 # 修改 yarn 配置方式
-RUN npm config set registry https://registry.npmmirror.com/ && \
-    yarn config set npmRegistryServer https://registry.npmmirror.com && \
+RUN  yarn config set npmRegistryServer https://registry.npmmirror.com && \
     yarn config set networkTimeout 300000 && \
     rm -rf node_modules yarn.lock && \
     yarn install --network-timeout 300000 --frozen-lockfile
