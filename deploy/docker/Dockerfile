@@ -66,7 +66,8 @@ RUN mkdir -p /etc/apt/keyrings \
 # Download nodejs and install tyarn
 RUN apt-get update \
   && apt-get install --no-install-recommends -y nodejs \
-  && npm install -g tyarn
+  && npm install -g tyarn \
+  && npm install -g yarn
 
 # Copy and build the node-service app
 COPY server/node-service/ /lowcoder/node-service/app/
@@ -108,6 +109,7 @@ RUN mkdir -p /etc/apt/keyrings \
 # Download nodejs and install tyarn
 RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y nodejs gosu \
+  && npm install -g yarn \
   && npm install -g tyarn \
   && rm -rf /var/cache/apt/lists \
   && addgroup --system --gid 9001 lowcoder \
@@ -126,7 +128,8 @@ CMD [ "/bin/sh", "/lowcoder/node-service/entrypoint.sh" ]
 FROM m.daocloud.io/docker.io/library/node:20.2-slim AS build-client
 RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
     sed -i 's/security.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
-    apt-get clean
+    apt-get clean \
+    && npm install -g tyarn \
 
 # curl is required for yarn build to succeed
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
