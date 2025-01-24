@@ -26,14 +26,14 @@ spec:
           name: bluesky
           readinessProbe:
             httpGet:
-              port: 8080
-              path: /
+              port: 3000
+              path: /bluesky
             initialDelaySeconds: 30
             periodSeconds: 30
           livenessProbe:
             httpGet:
-              port: 8080
-              path: /
+              port: 3000
+              path: /bluesky
             initialDelaySeconds: 600   # 容器启动后多久开始检测，设置稍长一点，避免还没完全启动就开始检测
             timeoutSeconds: 5          # 表示多少秒内没响应，就认为超时
             periodSeconds: 30          # 探测周期，多少秒探测一次

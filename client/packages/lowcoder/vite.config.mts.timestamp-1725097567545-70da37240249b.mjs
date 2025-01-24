@@ -22,13 +22,13 @@ function ensureLastSlash(str) {
   return str;
 }
 
-// src/dev-utils/buildVars.js
-var buildVars = [
-  {
-    name: "PUBLIC_URL",
-    defaultValue: "/backstage/bluesky/"
-  },
-  {
+  // src/dev-utils/buildVars.js
+  var buildVars = [
+    {
+      name: "PUBLIC_URL",
+      defaultValue: "/backstage/bluesky/"
+    },
+    {
     name: "REACT_APP_EDITION",
     defaultValue: "community"
   },

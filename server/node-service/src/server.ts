@@ -10,7 +10,7 @@ import apiRouter from "./routes/apiRouter";
 import systemRouter from "./routes/systemRouter";
 collectDefaultMetrics();
 
-const prefix = "/bluesky/node-service";
+const prefix = "/node-service";
 
 const router = express();
 
