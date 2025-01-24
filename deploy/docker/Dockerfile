@@ -139,7 +139,7 @@ WORKDIR /lowcoder-client
 RUN  yarn config set npmRegistryServer https://registry.npmmirror.com && \
     yarn config set networkTimeout 300000 && \
     rm -rf node_modules yarn.lock && \
-    yarn install --network-timeout 300000 --frozen-lockfile
+    yarn install
 
 ARG REACT_APP_COMMIT_ID=test
 ARG REACT_APP_ENV=production
