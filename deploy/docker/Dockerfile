@@ -128,12 +128,13 @@ CMD [ "/bin/sh", "/lowcoder/node-service/entrypoint.sh" ]
 FROM m.daocloud.io/docker.io/library/node:20.2-slim AS build-client
 RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
     sed -i 's/security.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
-    apt-get clean \
-    && npm install -g tyarn \
+    apt-get clean
+
 
 # curl is required for yarn build to succeed
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
 
+RUN npm install -g tyarn
 # Build client
 COPY ./client /lowcoder-client
 WORKDIR /lowcoder-client
