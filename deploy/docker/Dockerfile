@@ -74,8 +74,8 @@ WORKDIR /lowcoder/node-service/app/
 
 # 清理并重新安装依赖
 RUN rm -rf node_modules yarn.lock \
-    && npm cache clean  \
-    && yarn install  \
+    && npm cache clean --force \
+    && yarn install --network-timeout 1000000 \
     && sed -i 's/"build": "rm -rf build\/ && yarn test && tsc && yarn copy"/"build": "rm -rf build\/ && tsc && yarn copy"/' package.json \
     && cd node_modules/duckdb \
     && npm rebuild \
