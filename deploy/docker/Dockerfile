@@ -135,10 +135,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certifi
 COPY ./client /lowcoder-client
 WORKDIR /lowcoder-client
 
-# 修改这部分，添加 yarn 配置和清理
+# 修改 yarn 配置方式
 RUN npm config set registry https://registry.npmmirror.com/ && \
-    yarn config set registry https://registry.npmmirror.com/ && \
-    yarn config set network-timeout 300000 && \
+    yarn config set npmRegistryServer https://registry.npmmirror.com && \
+    yarn config set networkTimeout 300000 && \
     rm -rf node_modules yarn.lock && \
     yarn install --network-timeout 300000 --frozen-lockfile
 
