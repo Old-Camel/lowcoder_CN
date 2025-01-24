@@ -127,13 +127,20 @@ FROM m.daocloud.io/docker.io/library/node:20.2-slim AS build-client
 RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
     sed -i 's/security.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
     apt-get clean
-# curl is required for yarn build  to succeed, because it calls it while building client
+
+# curl is required for yarn build to succeed
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
 
 # Build client
 COPY ./client /lowcoder-client
 WORKDIR /lowcoder-client
-RUN  yarn install
+
+# 修改这部分，添加 yarn 配置和清理
+RUN npm config set registry https://registry.npmmirror.com/ && \
+    yarn config set registry https://registry.npmmirror.com/ && \
+    yarn config set network-timeout 300000 && \
+    rm -rf node_modules yarn.lock && \
+    yarn install --network-timeout 300000 --frozen-lockfile
 
 ARG REACT_APP_COMMIT_ID=test
 ARG REACT_APP_ENV=production
