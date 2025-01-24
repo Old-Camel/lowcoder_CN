@@ -134,7 +134,7 @@ RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.li
 # curl is required for yarn build to succeed
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
 
-RUN npm install -g tyarn
+RUN npm install -g tyarn --registry https://registry.npmmirror.com/
 # Build client
 COPY ./client /lowcoder-client
 WORKDIR /lowcoder-client
