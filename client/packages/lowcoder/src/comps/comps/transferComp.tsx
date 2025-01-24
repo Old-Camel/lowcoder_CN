@@ -9,14 +9,15 @@ import { Section, sectionNames } from "lowcoder-design";
 import { hiddenPropertyView } from "comps/utils/propertyUtils";
 import { trans } from "i18n";
 import { NumberControl, StringControl } from "comps/controls/codeControl";
-import { default as Transfer } from "antd/es/transfer";
-import type { TransferKey } from "antd/es/transfer/interface";
+import { Transfer } from "antd";
 import ReactResizeDetector from "react-resize-detector";
 import { changeEvent, eventHandlerControl, searchEvent, selectedChangeEvent } from "../controls/eventHandlerControl";
 import styled, { css } from "styled-components";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { valueComp, withDefault } from "../generators";
 import type { TransferDirection } from 'antd/es/transfer';
+import { _ } from "core-js";
+
 
 const Container = styled.div<{ $style: TransferStyleType }>`
   height: 100%;
@@ -27,12 +28,6 @@ const Container = styled.div<{ $style: TransferStyleType }>`
 const getStyle = (style: TransferStyleType) => {
   return css`
     margin: ${style.margin};
-    padding: ${style.padding};
-    border-style: ${style.borderStyle};
-    border-width: ${style.borderWidth};
-    border-color: ${style.border};
-    background: ${style.background};
-    border-radius: ${style.radius};
     max-width: ${widthCalculator(style.margin)};
     max-height: ${heightCalculator(style.margin)};
   `;
@@ -56,7 +51,7 @@ const defaultItems = [
 const EventOptions = [changeEvent, searchEvent, selectedChangeEvent] as const;
 
 const childrenMap = {
-  style: styleControl(TransferStyle , 'style'),
+  style: styleControl(TransferStyle),
   onEvent: eventHandlerControl(EventOptions),
   sourceTitle: withDefault(StringControl, trans('transfer.sourceTitle')),
   targetTitle: withDefault(StringControl, trans('transfer.targetTitle')),
@@ -85,15 +80,15 @@ const TransferView = (props: RecordConstructorToView<typeof childrenMap> & {
     }
   }, [height, width]);
 
-  const handleChange = (newTargetKeys: TransferKey[]) => {
-    props.targetKeys.onChange(newTargetKeys as string[]);
+  const handleChange = (newTargetKeys: string[]) => {
+    props.targetKeys.onChange(newTargetKeys);
     props.dispatch(changeChildAction("targerObject", Array.isArray(props.items.value) ? props.items.value.filter(item => newTargetKeys.includes(item.key as string)) : [], false));
     props.onEvent('change')
   };
 
-  const onSelectChange = (sourceSelectedKeys: TransferKey[], targetSelectedKeys: TransferKey[]) => {
-    setSelectedKeys([...sourceSelectedKeys, ...targetSelectedKeys] as string[]);
-    props.dispatch(changeChildAction("selectedKeys", [sourceSelectedKeys as string[], targetSelectedKeys as string[]], false));
+  const onSelectChange = (sourceSelectedKeys: string[], targetSelectedKeys: string[]) => {
+    setSelectedKeys([...sourceSelectedKeys, ...targetSelectedKeys]);
+    props.dispatch(changeChildAction("selectedKeys", [sourceSelectedKeys, targetSelectedKeys], false));
     props.onEvent('selectedChange')
   };
 
@@ -139,9 +134,7 @@ const TransferView = (props: RecordConstructorToView<typeof childrenMap> & {
 };
 
 let TransferBasicComp = (function () {
-  return new UICompBuilder(childrenMap, (props, dispatch) => {
-    return (
-    <TransferView {...props} dispatch={dispatch} />)})
+  return new UICompBuilder(childrenMap, (props, dispatch) => <TransferView {...props} dispatch={dispatch} />)
     .setPropertyViewFn((children) => (
       <>
         <Section name={sectionNames.basic}>
