@@ -280,16 +280,18 @@ COPY --chown=lowcoder:lowcoder deploy/docker/all-in-one/entrypoint.sh /lowcoder/
 RUN chmod 775 /lowcoder/entrypoint.sh
 
 # Fixes for OpenShift compatibility (after all files are copied)
+
 RUN echo  \
   && adduser lowcoder root \
   && mkdir -p /lowcoder-stacks \
-  && for i in /lowcoder-stacks /lowcoder/assets /lowcoder/api-service/logs /lowcoder/etc/supervisord /lowcoder/node-service/logs; do \
-       mkdir -p "$i"; \
-       chmod -R 775 "$i"; \
+  && for i in /lowcoder-stacks /lowcoder/assets /lowcoder/api-service/logs /lowcoder/etc/supervisord; do \
+       chmod -R g+rw "$i"; \
        chown -R lowcoder:root "$i"; \
      done \
-  && chown -R lowcoder:root /var/log /lowcoder \
-  && chmod -R 775 /run /etc/nginx /var/cache/nginx /var/log /lowcoder
+  && chown -R lowcoder:root /var/log \
+  && chmod -R g+rw /run /etc/nginx /var/cache/nginx /var/log
+
+
 
 # Fix all shell script line endings in /lowcoder and /docker-entrypoint.d directories
 RUN find /lowcoder -type f -name "*.sh" -exec sed -i 's/\r$//' {} \; \
