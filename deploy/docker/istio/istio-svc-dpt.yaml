@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bluesky-devp
+  namespace: cloud
+  labels:
+    app: bluesky
+    version: devp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bluesky
+      version: devp
+  template:
+    metadata:
+      labels:
+        app: bluesky
+        version: devp
+      annotations:
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: 0.0.0.0/0
+    spec:
+      serviceAccount: cloud
+      containers:
+        - image: harbor.yunzainfo.com:10000/cloud/bluesky:devp
+          name: bluesky
+          readinessProbe:
+            httpGet:
+              port: 8080
+              path: /bluesky
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          livenessProbe:
+            httpGet:
+              port: 8080
+              path: /bluesky
+            initialDelaySeconds: 600   # 容器启动后多久开始检测，设置稍长一点，避免还没完全启动就开始检测
+            timeoutSeconds: 5          # 表示多少秒内没响应，就认为超时
+            periodSeconds: 30          # 探测周期，多少秒探测一次
+            failureThreshold: 3        # 连续探测几次表示失败
+          resources:
+            requests:
+              cpu: "1"
+              memory: "2048Mi"
+            limits:
+              cpu: "2"
+              memory: "4096Mi"
+          imagePullPolicy: Always
+          env:
+            - name: JAVA_OPTS
+              value: "-Xmx4G -Xms800M"
+            - name: LOWCODER_MONGODB_ENABLED
+              value: "false"
+            - name: LOWCODER_REDIS_ENABLED
+              value: "false"
+            - name: LOWCODER_MONGODB_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: global
+                  key: LOWCODER_MONGODB_URL
+            - name: LOWCODER_REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: global
+                  key: LOWCODER_REDIS_URL
+            - name: LOWCODER_EMAIL_SIGNUP_ENABLED
+              value: "false"
+            - name: LOWCODER_SUPERUSER_USERNAME
+              value: "yunzai@yunzai.com"
+            - name: LOWCODER_SUPERUSER_PASSWORD
+              value: "123.comM"
+            - name: ORACLE_INST
+              valueFrom:
+                configMapKeyRef:
+                  name: global
+                  key: ORACLE_INST
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: password
+                  key: redis_password
+                  optional: true
+          ports:
+            - containerPort: 3000
+          securityContext:
+            privileged: true
+            allowPrivilegeEscalation: true
+            capabilities:
+              add: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bluesky
+  labels:
+    app: bluesky
+  namespace: cloud
+spec:
+  selector:
+    app: bluesky
+  ports:
+    - port: 3000
+      name: http
+---

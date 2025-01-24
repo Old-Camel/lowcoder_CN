@@ -16,9 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   // EditPopover,
   HomeDataSourceIcon,
-  HomeIconDark,
-  HomeModuleActiveIcon,
-  HomeModuleIcon,
+
   NewsIcon,
   WorkspacesIcon,
   // HomeModuleIcon,

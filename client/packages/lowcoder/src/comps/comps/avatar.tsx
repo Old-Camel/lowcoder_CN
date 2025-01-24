@@ -35,7 +35,7 @@ import { DropdownOptionControl } from "../controls/optionsControl";
 import { ReactElement, useContext } from "react";
 import { CompNameContext, EditorContext } from "../editorState";
 
-const AvatarWrapper = styled(Avatar) <AvatarProps & { $cursorPointer: boolean, $style: AvatarStyleType }>`
+const AvatarWrapper = styled(Avatar) <AvatarProps & { $cursorPointer?: boolean, $style: AvatarStyleType }>`
   background: ${(props) => props.$style.background};
   color: ${(props) => props.$style.fill};
   cursor: ${(props) => props.$cursorPointer ? 'pointer' : ''};
@@ -59,16 +59,16 @@ ${(props) => {
   }}
 `
 
-const LabelWarpper = styled.div<{ iconSize: number, alignmentPosition: string }>`
-width: calc(100% - ${(props) => props.iconSize}px);
-display: flex;
-padding-left: 5px;
-padding-right: 5px;
-flex-direction: column;
-justify-content: flex-end;
-align-items: ${(props) => props.alignmentPosition === 'left' ? 'flex-start' : 'flex-end'};
+const LabelWrapper = styled.div<{ iconSize: number, alignmentPosition: string }>`
+    width: calc(100% - ${(props) => props.iconSize}px);
+    display: flex;
+    padding-left: 5px;
+    padding-right: 5px;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: ${(props) => props.alignmentPosition === 'left' ? 'flex-start' : 'flex-end'};
 `
-const LabelSpan = styled.span<{ color: string }>`
+const LabelSpan = styled.span<{  $style:AvatarLabelStyleType     }>`
 max-width: 100%;
 overflow: hidden;
 text-overflow: ellipsis;
@@ -167,11 +167,11 @@ const AvatarView = (props: RecordConstructorToView<typeof childrenMap>) => {
     >
       <Wrapper iconSize={props.iconSize} labelPosition={props.labelPosition} $style={props.style}>
         <Badge
-          count={props.badgeCount.value}
-          dot={props.badgeType === 'dot'}
-          size={props.badgeSize}
+          count={props.budgeCount.value}
+          dot={props.budgeType === 'dot'}
+          size={props.budgeSize}
           overflowCount={props.overflowCount}
-          title={props.badgeTitle}
+          title={props.budgeTitle}
           offset={props.shape === 'circle' ? [-2, 6] : [0, 0]}
         >
           <AvatarWrapper
@@ -274,7 +274,7 @@ let AvatarBasicComp = (function () {
 })();
 
 
-export const AvatarComp = withExposingConfigs(IconBasicComp, [
+export const AvatarComp = withExposingConfigs(AvatarBasicComp, [
   NameConfigHidden,
   new NameConfig("budgeCount", trans("button.textDesc")),
 ]);

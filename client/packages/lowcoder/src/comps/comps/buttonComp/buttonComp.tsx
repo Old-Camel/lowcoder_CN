@@ -25,8 +25,6 @@ import {
 } from "./buttonCompConstants";
 import { RefControl } from "comps/controls/refControl";
 import { BudgeBasicSection, budgeChildren } from "../budgeComp/budgeConstants";
-import React, { useContext } from "react";
-
 import React, { useContext, useEffect } from "react";
 import { AnimationStyle } from "@lowcoder-ee/comps/controls/styleControlConstants";
 import { styleControl } from "@lowcoder-ee/comps/controls/styleControl";
@@ -141,7 +139,7 @@ const ButtonTmpComp = (function () {
   return new UICompBuilder(childrenMap, (props) => {
     return(
 
-        <ButtonCompWrapper disabled={props.disabled}>
+        <ButtonCompWrapper $disabled={props.disabled}>
             <EditorContext.Consumer>
                 {(editorState) => (
                     <Badge100

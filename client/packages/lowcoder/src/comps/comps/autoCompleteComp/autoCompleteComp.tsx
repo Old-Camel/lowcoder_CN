@@ -15,14 +15,15 @@ import {
   NameConfigRequired,
   withExposingConfigs,
 } from "comps/generators/withExposing";
-import styled,{ css } from "styled-components";
-import { UICompBuilder, withDefault } from "../../generators";
 import styled, { css } from "styled-components";
 import { UICompBuilder, withDefault } from "../../generators";
 import { FormDataPropertyView } from "../formComp/formDataConstants";
 import { jsonControl } from "comps/controls/codeControl";
 import { dropdownControl } from "comps/controls/dropdownControl";
+import { default as AutoComplete } from "antd/es/auto-complete";
+
 import {
+    getStyle,
   TextInputBasicSection,
   textInputChildren,
   TextInputConfigs,
@@ -56,11 +57,13 @@ import {
   autocompleteIconColor,
   FirstPinyinOption,
   AllPinyinOption,
+    componentSize
 } from "./autoCompleteConstants";
 import { BaseOptionType, DefaultOptionType } from "antd/es/select";
 import { pinyin } from 'pinyin-pro';
 import { FilterFunc } from "rc-select/lib/Select";
 import _ from "lodash";
+import {ConfigProvider} from "antd";
 
 
 const InputStyle = styled(Input) <{ $style: InputLikeStyleType }>`
@@ -123,8 +126,8 @@ const childrenMap = {
   viewRef: RefControl<InputRef>,
   allowClear: BoolControl.DEFAULT_TRUE,
 
-    style: withDefault(styleControl(InputFieldStyle , 'style')),
-  labelStyle: withDefault(styleControl(LabelStyle , 'labelStyle')),
+    style: withDefault(styleControl(InputFieldStyle , 'style'),{}),
+  labelStyle: withDefault(styleControl(LabelStyle , 'labelStyle'),{}),
   prefixIcon: IconControl,
   suffixIcon: IconControl,
   items: jsonControl(convertAutoCompleteData, autoCompleteDate),
@@ -135,7 +138,9 @@ const childrenMap = {
   valueOrLabel: dropdownControl(valueOrLabelOption, "label"),
   autoCompleteType: dropdownControl(autoCompleteType, "normal"),
   autocompleteIconColor: dropdownControl(autocompleteIconColor, "blue"),
-  valueInItems: booleanExposingStateControl("valueInItems"),
+    componentSize: dropdownControl(componentSize, "small"),
+
+    valueInItems: booleanExposingStateControl("valueInItems"),
   inputFieldStyle: styleControl(InputLikeStyle , 'inputFieldStyle'),
   animationStyle: styleControl(AnimationStyle , 'animationStyle'),
   selectObject: jsonObjectExposingStateControl("selectObject", {}),
@@ -163,6 +168,7 @@ let AutoCompleteCompBase = (function () {
       valueOrLabel,
       autoCompleteType,
       autocompleteIconColor,
+      componentSize
     } = props;
 
 

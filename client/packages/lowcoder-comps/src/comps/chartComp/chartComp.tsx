@@ -23,6 +23,7 @@ import {
   UICompBuilder,
   withDefault,
   withExposingConfigs,
+  withMethodExposing,
   withViewFn,
   ThemeContext,
   chartColorPalette,
@@ -60,7 +61,16 @@ ChartTmpComp = withViewFn(ChartTmpComp, (comp) => {
   } catch (error) {
     log.error('theme chart error: ', error);
   }
+  const mode = comp.children.mode.getView();
+  const mapCenterPosition = {
+    lng: comp.children.mapCenterLng.getView(),
+    lat: comp.children.mapCenterLat.getView(),
+  }
+  const [mapScriptLoaded, setMapScriptLoaded] = useState(false);
 
+  const onEvent = comp.children.onEvent.getView();
+  const onUIEvent = comp.children.onUIEvent.getView();
+  const onMapEvent = comp.children.onMapEvent.getView();
   const triggerClickEvent = async (dispatch: any, action: CompAction<JSONValue>) => {
     await getPromiseAfterDispatch?.(
       dispatch,
@@ -121,10 +131,10 @@ ChartTmpComp = withViewFn(ChartTmpComp, (comp) => {
 
       if (param.fromAction === "select") {
 
-        comp.dispatch(changeChildAction("selectedPoints", getSelectedPoints(param, option)));
+        comp.dispatch(changeChildAction("selectedPoints", getSelectedPoints(param, option),false));
         onEvent("select");
       } else if (param.fromAction === "unselect") {
-        comp.dispatch(changeChildAction("selectedPoints", getSelectedPoints(param, option)));
+        comp.dispatch(changeChildAction("selectedPoints", getSelectedPoints(param, option),false));
         onEvent("unselect");
       }
 
@@ -139,8 +149,7 @@ ChartTmpComp = withViewFn(ChartTmpComp, (comp) => {
       document.removeEventListener('clickEvent', clickEventCallback)
     };
   }, [mode, onUIEvent]);
-    return () => echartsCompInstance.off("selectchanged");
-  }, [onEvent]);
+
 
   const echartsConfigChildren = _.omit(comp.children, echartsConfigOmitChildren);
   const option = useMemo(() => {
@@ -177,7 +186,7 @@ ChartTmpComp = withViewFn(ChartTmpComp, (comp) => {
       />
     </ReactResizeDetector>
   );
-
+}); // 这里添加闭合括号
 
 function getYAxisFormatContextValue(
   data: Array<JSONObject>,
@@ -272,7 +281,7 @@ ChartTmpComp = class extends ChartTmpComp {
   }
 };
 
-const ChartComp = withExposingConfigs(ChartTmpComp, [
+let ChartComp = withExposingConfigs(ChartTmpComp, [
   depsConfig({
     name: "selectedPoints",
     desc: trans("chart.selectedPointsDesc"),

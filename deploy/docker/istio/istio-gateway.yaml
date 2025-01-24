@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: bluesky
+  namespace: cloud
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - cloud-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /bluesky
+    route:
+    - destination:
+        host: bluesky
+        port:
+         number: 3000

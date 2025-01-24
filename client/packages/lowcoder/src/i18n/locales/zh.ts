@@ -1,5 +1,6 @@
 import table from "./componentDocExtra/table.md?url";
 import { mergeObject } from "./en";
+import { en } from "./en";
 
 export const zh  = mergeObject({
 productName: "Lowcoder",

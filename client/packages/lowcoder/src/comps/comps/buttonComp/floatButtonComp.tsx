@@ -16,7 +16,7 @@ import { IconControl } from "comps/controls/iconControl";
 import styled from "styled-components";
 import { manualOptionsControl } from "comps/controls/optionsControl";
 import { useContext, useEffect } from "react";
-import { ButtonEventHandlerControl, MultiCompBuilder, NumberControl, manualOptionsControl, valueComp } from "@lowcoder-ee/index.sdk";
+import { ButtonEventHandlerControl } from "@lowcoder-ee/index.sdk";
 
 const StyledFloatButton = styled(FloatButton)<{
     $animationStyle: AnimationStyleType;
@@ -24,7 +24,7 @@ const StyledFloatButton = styled(FloatButton)<{
   ${(props) => props.$animationStyle}
 `;
 
-const Wrapper = styled.div<{ $style: FloatButtonStyleType }>`
+const Wrapper = styled.div<{ $badgeStyle: BadgeStyleType, $style: FloatButtonStyleType}>`
     width: 0px;
     height: 0px;
     overflow: hidden;
@@ -65,9 +65,13 @@ const buttonGroupOption = new MultiCompBuilder(
         label: StringControl,
         badge: withDefault(NumberControl, 0),
         description: withDefault(StringControl, ''),
+        buttonType: dropdownControl(buttonTypeOption, 'custom'),
+
         icon: withDefault(IconControl, '/icon:antd/questioncircleoutlined'),
         onEvent: ButtonEventHandlerControl,
         hidden: BoolControl,
+        visibilityHeight: withDefault(NumberControl, 0),
+
     },
     (props) => props
 )
@@ -110,6 +114,7 @@ const FloatButtonView = (props: RecordConstructorToView<typeof childrenMap>) => 
     const renderButton = (button: any, onlyOne?: boolean) => {
         return !button?.hidden ? (button?.buttonType === 'custom' ?
             (<StyledFloatButton
+                $animationStyle={props.animationStyle}
                 key={button?.id}
                 icon={button?.icon}
                 onClick={() => button.onEvent("click")}
@@ -137,7 +142,6 @@ const FloatButtonView = (props: RecordConstructorToView<typeof childrenMap>) => 
                     style={{ right: -20 }}
                     icon={props.icon}
                     shape={props.shape}
-                    badge={{ count: props.buttons.reduce((sum, i) => sum + (i.buttonType === 'custom' && !i.hidden ? i.badge : 0), 0), color: props.style.badgeColor, dot: props.dot }}
                     badge={{ count: props.buttons.reduce((sum, i) => sum + (i.buttonType === 'custom' && !i.hidden ? i.badge : 0), 0), color: props.badgeStyle.badgeColor, dot: props.dot }}
                     type={props.buttonTheme}
                 >

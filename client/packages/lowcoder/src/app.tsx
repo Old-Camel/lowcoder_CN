@@ -28,7 +28,7 @@ import {
   ADMIN_APP_URL,
   ORG_AUTH_FORGOT_PASSWORD_URL,
   ORG_AUTH_RESET_PASSWORD_URL,
-  ADMIN_AUTH_URL,
+  ADMIN_AUTH_URL, ROOT_PATH,
 } from "constants/routesURL";
 import React from "react";
 import { createRoot } from "react-dom/client";
@@ -357,7 +357,7 @@ class AppIndex extends React.Component<AppIndexProps, any> {
                 component={LazyComponentDoc}
               />
               <LazyRoute
-                path={`/playground/:name/:dsl`}
+                path={`${ROOT_PATH}/playground/:name/:dsl`}
                 component={LazyComponentPlayground}
               />
 
@@ -376,16 +376,17 @@ class AppIndex extends React.Component<AppIndexProps, any> {
               {developEnv() && (
                 <>
                   <LazyRoute
-                    path="/debug_comp/:name"
+                    path={`${ROOT_PATH}/debug_comp/:name`}
                     component={LazyDebugComp}
                   />
                   <LazyRoute
                     exact
-                    path="/debug_comp"
+                    path={`${ROOT_PATH}/debug_comp`}
+
                     component={LazyDebugComp}
                   />
-                  <LazyRoute path="/debug_editor" component={LazyAppEditor} />
-                  <LazyRoute path="/debug_new" component={LazyDebugNewComp} />
+                  <LazyRoute   path={`${ROOT_PATH}/debug_editor`} component={LazyAppEditor} />
+                  <LazyRoute path={`${ROOT_PATH}/debug_new`}  component={LazyDebugNewComp} />
                 </>
               )}
             </Switch>

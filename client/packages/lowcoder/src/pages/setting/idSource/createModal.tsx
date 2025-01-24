@@ -1,4 +1,4 @@
-import { CustomSelect } from "lowcoder-design";
+import { CustomSelect,messageInstance,CloseEyeIcon } from "lowcoder-design";
 import {
   CustomModalStyled,
 } from "../styled";
@@ -15,6 +15,9 @@ import { GeneralLoginIcon } from "assets/icons";
 import _ from "lodash";
 import GenericOAuthForm from "./OAuthForms/GenericOAuthForm";
 import GeneralOAuthForm from "./OAuthForms/GeneralOAuthForm";
+import {useState} from "react";
+import IdSourceApi, { ConfigItem } from "api/idSourceApi";
+import { validateResponse } from "api/apiUtils";
 
 type CreateModalProp = {
   modalVisible: boolean;
@@ -50,9 +53,32 @@ function CreateModal(props: CreateModalProp) {
       label: config.sourceName,
       value: config.sourceValue,
     }));
-
+  function saveAuthProvider(values: ConfigItem) {
+    setSaveLoading(true);
+    const config = {
+      ...values,
+      enableRegister: true,
+    }
+    IdSourceApi.saveConfig(config)
+        .then((resp) => {
+          if (validateResponse(resp)) {
+            messageInstance.success(trans("idSource.saveSuccess"));
+          }
+        })
+        .catch((e) => messageInstance.error(e.message))
+        .finally(() => {
+          setSaveLoading(false);
+          onConfigCreate();
+        });
+  }
   const selectedAuthType = Form.useWatch('authType', form);;
-
+  const [saveLoading, setSaveLoading] = useState(false);
+  const handleOk = () => {
+    form.validateFields().then(values => {
+      // console.log(values)
+      saveAuthProvider(values)
+    })
+  }
   return (
     <CustomModalStyled
       width="500px"

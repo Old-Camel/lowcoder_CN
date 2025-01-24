@@ -15,7 +15,6 @@ import { ScatterChartConfig } from "./chartConfigs/scatterChartConfig";
 import { SeriesListComp } from "./seriesComp";
 import { EChartsOption } from "echarts";
 import { i18nObjs, trans } from "i18n/comps";
-import { JSONValue } from "lowcoder";
 
 export const ChartTypeOptions = [
   {

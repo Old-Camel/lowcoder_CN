@@ -1,7 +1,7 @@
 package org.lowcoder.infra.constant;
 
 public final class Url {
-    public static final String BASE_URL = "/api";
+    public static final String BASE_URL = "/bluesky/api";
     public static final String VERSION = "/v1";
     public static final String ORGANIZATION_URL = BASE_URL + VERSION + "/organizations";
     public static final String DATASOURCE_URL = BASE_URL + VERSION + "/datasources";

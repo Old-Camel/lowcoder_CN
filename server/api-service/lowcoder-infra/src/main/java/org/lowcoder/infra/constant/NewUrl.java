@@ -5,7 +5,7 @@ public final class NewUrl {
     private NewUrl() {
     }
 
-    public static final String PREFIX = "/api";
+    public static final String PREFIX = "/bluesky/api";
     public static final String ORGANIZATION_URL = PREFIX + "/organizations";
     public static final String DATASOURCE_URL = PREFIX + "/datasources";
     public static final String USER_URL = PREFIX + "/users";

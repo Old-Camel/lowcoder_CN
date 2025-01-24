@@ -7,7 +7,7 @@ import React, { useContext } from "react";
 import styled from "styled-components";
 import type { DateTimeStyleType } from "../../controls/styleControlConstants";
 import { EditorContext } from "../../editorState";
-import { default as DatePicker } from "antd/es/date-picker";
+import {DatePickerProps, default as DatePicker} from "antd/es/date-picker";
 import type {PickerMode} from "lowcoder-sdk";
 import type { Dayjs } from 'dayjs';
 import { DateParser } from "@lowcoder-ee/util/dateTimeUtils";
@@ -37,7 +37,8 @@ const StyledAntdSelect = styled(AntdSelect)`
 export interface DataUIViewProps extends DateCompViewProps {
   value?: DatePickerProps<Dayjs>['value'];
   onChange: DatePickerProps<Dayjs>['onChange'];
-  onPanelChange: () => void;
+
+    onPanelChange: () => void;
   picker?: PickerMode
   onClickDateTimeZone:(value:any)=>void;
 

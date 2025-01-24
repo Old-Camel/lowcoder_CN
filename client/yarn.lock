@@ -46,6 +46,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@amap/amap-react@npm:^0.1.5":
+  version: 0.1.5
+  resolution: "@amap/amap-react@npm:0.1.5"
+  peerDependencies:
+    react: ">=16.0.0"
+    react-dom: ">=16.0.0"
+  checksum: 21eda6105b8c930d87894abe2bc2bac32c086829f17b6fecca1d8ea97b5978ee1965d984879fbe102a479c58161aed8167052c8d82d94eb4fb553976d2dd6d59
+  languageName: node
+  linkType: hard
+
 "@ampproject/remapping@npm:^2.2.0":
   version: 2.3.0
   resolution: "@ampproject/remapping@npm:2.3.0"
@@ -2457,6 +2467,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fullcalendar/daygrid@npm:~6.1.15":
+  version: 6.1.15
+  resolution: "@fullcalendar/daygrid@npm:6.1.15"
+  peerDependencies:
+    "@fullcalendar/core": ~6.1.15
+  checksum: 16763615c2410be622e428f3f1a7379745769c4a8aa1a3475fce7fc74b7f3f9625f5817a614d46089ff7b54040e6b5e295bd984a8240b49b23c347caec2b9f20
+  languageName: node
+  linkType: hard
+
 "@fullcalendar/interaction@npm:^6.1.6":
   version: 6.1.11
   resolution: "@fullcalendar/interaction@npm:6.1.11"
@@ -2485,14 +2504,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fullcalendar/multimonth@npm:^6.1.6":
-  version: 6.1.11
-  resolution: "@fullcalendar/multimonth@npm:6.1.11"
+"@fullcalendar/multimonth@npm:^6.1.8":
+  version: 6.1.15
+  resolution: "@fullcalendar/multimonth@npm:6.1.15"
   dependencies:
-    "@fullcalendar/daygrid": ~6.1.11
+    "@fullcalendar/daygrid": ~6.1.15
   peerDependencies:
-    "@fullcalendar/core": ~6.1.11
-  checksum: 213a9ac97e46319bbcfce3f02edaa1b808790f58669fee06e00a7fbb9f638dfabf37c6243234758670e75ee2c1e1cb247131c3a5bb469fec77b60db577b7326c
+    "@fullcalendar/core": ~6.1.15
+  checksum: 9922d60ca26642cecd80bfeffbf52608c30f0cc6146786c98205f70a19509527ee0e4efdc3ae91a47ec13e240826e83239ab9d9694150d89b6a80c966c7ae55d
   languageName: node
   linkType: hard
 
@@ -7673,16 +7692,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-coolshapes-react@lowcoder-org/coolshapes-react:
-  version: 1.0.1
-  resolution: "coolshapes-react@https://github.com/lowcoder-org/coolshapes-react.git#commit=0530e0e01feeba965286c1321f9c1cacb47bf587"
-  peerDependencies:
-    react: ">=16.8"
-    react-dom: ">=16.8"
-  checksum: e1b199f0325e87865cf6d89d4891ee84f4930196d21eed2356f4f2d2af8e748b8ad3889d1c9da2f5db6971913f75bd0f800b67a443ab7f4e972678031ce5c717
-  languageName: node
-  linkType: hard
-
 "copy-anything@npm:^2.0.1":
   version: 2.0.6
   resolution: "copy-anything@npm:2.0.6"
@@ -8894,6 +8903,13 @@ coolshapes-react@lowcoder-org/coolshapes-react:
   languageName: node
   linkType: hard
 
+"dhtmlx-gantt@npm:^8.0.6":
+  version: 8.0.11
+  resolution: "dhtmlx-gantt@npm:8.0.11"
+  checksum: b6c556de0747e8ee20368905e1125143ccf268a519d11842cc88641d1cf8fd97b25a29522c9839b3918e70ea87183664793cc66b1f62e18710eee319fa89b008
+  languageName: node
+  linkType: hard
+
 "diff-sequences@npm:^29.6.3":
   version: 29.6.3
   resolution: "diff-sequences@npm:29.6.3"
@@ -8980,6 +8996,13 @@ coolshapes-react@lowcoder-org/coolshapes-react:
   version: 1.12.4
   resolution: "dom-align@npm:1.12.4"
   checksum: ff5cfdb6e9c9e03e6d67a61b4633f25845f2385f67b1bd84a28aa2cb2c6b58eea53fde347b0d2439f0ba49cd6b80a7463f98569731cb14ec2542ecdeef19d165
+  languageName: node
+  linkType: hard
+
+"dom-confetti@npm:0.2.2":
+  version: 0.2.2
+  resolution: "dom-confetti@npm:0.2.2"
+  checksum: 6b14f4432fa758b038d63cfb7c8d56577d4ce99b11b7a7c74d261e5fb2fb4e2495c6b6787ba78c778cfad2627730612234424f675c524d903ad8d7485319af22
   languageName: node
   linkType: hard
 
@@ -13834,7 +13857,7 @@ coolshapes-react@lowcoder-org/coolshapes-react:
     "@fullcalendar/interaction": ^6.1.6
     "@fullcalendar/list": ^6.1.9
     "@fullcalendar/moment": ^6.1.6
-    "@fullcalendar/multimonth": ^6.1.6
+    "@fullcalendar/multimonth": ^6.1.8
     "@fullcalendar/react": ^6.1.6
     "@fullcalendar/resource": ^6.1.11
     "@fullcalendar/resource-timegrid": ^6.1.11
@@ -13922,6 +13945,7 @@ coolshapes-react@lowcoder-org/coolshapes-react:
   version: 0.0.0-use.local
   resolution: "lowcoder-frontend@workspace:."
   dependencies:
+    "@amap/amap-react": ^0.1.5
     "@babel/preset-env": ^7.20.2
     "@babel/preset-typescript": ^7.18.6
     "@lottiefiles/react-lottie-player": ^3.5.3
@@ -14096,9 +14120,9 @@ coolshapes-react@lowcoder-org/coolshapes-react:
     buffer: ^6.0.3
     clsx: ^2.0.0
     cnchar: ^3.2.4
-    coolshapes-react: lowcoder-org/coolshapes-react
     copy-to-clipboard: ^3.3.3
     core-js: ^3.25.2
+    dhtmlx-gantt: ^8.0.6
     dotenv: ^16.0.3
     echarts: ^5.4.3
     echarts-wordcloud: ^2.1.0
@@ -14120,13 +14144,14 @@ coolshapes-react@lowcoder-org/coolshapes-react:
     moment: ^2.29.4
     numbro: ^2.3.6
     papaparse: ^5.3.2
-    qrcode.react: ^3.1.0
+    pinyin-pro: ^3.19.6
     rc-trigger: ^5.3.1
     react: ^18.2.0
     react-best-gradient-color-picker: ^3.0.10
     react-colorful: ^5.5.1
     react-documents: ^1.2.1
     react-dom: ^18.2.0
+    react-dom-confetti: ^0.2.0
     react-draggable: ^4.4.4
     react-error-boundary: ^4.0.13
     react-grid-layout: ^1.3.0
@@ -16470,6 +16495,13 @@ coolshapes-react@lowcoder-org/coolshapes-react:
   languageName: node
   linkType: hard
 
+"pinyin-pro@npm:^3.19.6":
+  version: 3.26.0
+  resolution: "pinyin-pro@npm:3.26.0"
+  checksum: c51a932ac17eca7d2c2f6f32b825a850fe5df9c1732e4d1aae77f79b2f0f487f344bf7d2da58a4e659fd0d2d26b146f4bdbb65616b4baba93addbd73d05317b2
+  languageName: node
+  linkType: hard
+
 "pirates@npm:^4.0.1, pirates@npm:^4.0.4":
   version: 4.0.6
   resolution: "pirates@npm:4.0.6"
@@ -16812,15 +16844,6 @@ coolshapes-react@lowcoder-org/coolshapes-react:
   version: 6.1.0
   resolution: "pure-rand@npm:6.1.0"
   checksum: 8d53bc02bed99eca0b65b505090152ee7e9bd67dd74f8ff32ba1c883b87234067c5bf68d2614759fb217d82594d7a92919e6df80f97885e7b12b42af4bd3316a
-  languageName: node
-  linkType: hard
-
-"qrcode.react@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "qrcode.react@npm:3.1.0"
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: 94a2942ecf83f461d869adb20305ae663c6d1abe93ef2c72442b07d756ce70cf6deb6fd588dc5b382b48c6991cfde1dfd5ac9b814c1461e71d5edb2d945e67fc
   languageName: node
   linkType: hard
 
@@ -17631,6 +17654,17 @@ coolshapes-react@lowcoder-org/coolshapes-react:
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
   checksum: a3f91557d2a05793cacc414208e2e05c37f7f54858ae4dd852aa8c42b4a9e9df3748f2e6cb62b1a153f9ee65271d7b61eb8afc7bf21338ed7ed97e9a4ea85d58
+  languageName: node
+  linkType: hard
+
+"react-dom-confetti@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "react-dom-confetti@npm:0.2.0"
+  dependencies:
+    dom-confetti: 0.2.2
+  peerDependencies:
+    react: "*"
+  checksum: 57ea07edad246545116dea341577dfeddbd77c8ebf2e81175319fe6b988fb4ed693a044c20b5ab5bcdf6e68fc0bf1d70338630155e67885cc59ca0b9933fb59c
   languageName: node
   linkType: hard
 

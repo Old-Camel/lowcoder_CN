@@ -11,7 +11,6 @@ import { BoolCodeControl, StringControl } from "comps/controls/codeControl";
 import { BoolControl } from "comps/controls/boolControl";
 import { useContext, useEffect, useRef, useState } from "react";
 import { EditorContext } from "comps/editorState";
-import { ButtonEventHandlerControl, IconControl, MultiCompBuilder, CardStyleType, StringControl, clickEvent, dropdownControl, eventHandlerControl, heightCalculator, optionsControl, refreshEvent, styleControl, widthCalculator, withDefault, CardStyle, CardEventHandlerControl } from "@lowcoder-ee/index.sdk";
 import { Card } from "antd";
 import styled from "styled-components";
 import { AnimationStyle, AnimationStyleType, CardHeaderStyle, CardHeaderStyleType, CardStyle, CardStyleType } from "comps/controls/styleControlConstants";
@@ -66,7 +65,7 @@ const Wrapper = styled.div<{
     border-inline-end: 1px solid ${props => props.$style?.border};
   }
   .ant-card-small >.ant-card-body {
-    padding: ${props => props.cardType == 'custom' ? '0px' : '10px'};
+    padding: ${props => props.$cardType == 'custom' ? '0px' : '10px'};
   }
   .ant-card .ant-card-head {
     background-color: ${props => props.$style?.background};

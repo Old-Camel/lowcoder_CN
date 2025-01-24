@@ -6,13 +6,13 @@
 	<parent>
 		<artifactId>lowcoder-root</artifactId>
 		<groupId>org.lowcoder</groupId>
-		<version>${revision}</version>
+		<version>2.5.3</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>lowcoder-dependencies</artifactId>
 	<packaging>pom</packaging>
-
+	<version>2.5.3</version>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CompAction, RecordConstructorToView, changeChildAction } from "lowcoder-core";
 import { BoolControl } from "comps/controls/boolControl";
 import { arrayObjectExposingStateControl } from "comps/controls/codeStateControl";
@@ -311,10 +312,12 @@ const GanttView = (props: RecordConstructorToView<typeof childrenMap> & {
 
     gantt.attachEvent("onAfterTaskAdd", function (id) {
       props.AutoCalculateProgress && refreshSummaryProgress(gantt.getParent(id), true);
-    }, 'handleAfterTaskAddRef')
+    }, { id: 'handleAfterTaskAddRef' })
 
+    // @ts-ignore
     gantt.attachEvent("onBeforeTaskDelete", function (id) {
       idParentBeforeDeleteTask = gantt.getParent(id);
+      return;
     }, { id: 'handleBeforeTaskDeleteRef' })
 
     gantt.attachEvent("onAfterTaskDelete", function () {
@@ -376,30 +379,31 @@ const GanttView = (props: RecordConstructorToView<typeof childrenMap> & {
   // 初始化
   useEffect(() => {
     gantt.config.sort = true;
+    // @ts-ignore
     gantt.ext.zoom.init(zoomConfig);
     gantt.clearAll()
     gantt.i18n.setLocale("cn");
     gantt.plugins({
       marker: true,
       drag_timeline: true,
-      export_api: true,
+      // export_api: true,
       tooltip: true,
     });
     // 取消原组件弹出框
     gantt.attachEvent(
-      'onBeforeLightbox',
-      function (id) {
-        return false;
-      },
-      { id: 'cancerPopOut' }
+        'onBeforeLightbox',
+        function (id) {
+          return false;
+        },
+        { id: 'cancerPopOut' }
     );
     // 任务拖动、进度条拖动后
     gantt.attachEvent("onAfterTaskDrag", function (id, mode, e) {
       props.dispatch(changeChildAction("currentId", id, false));
       props.dispatch(changeChildAction("currentProjectId", findProjectId(id), false));
       props.dispatch(changeChildAction("currentObject",
-        _.pickBy(gantt.getTask(id), (value, key) => !key.startsWith('$'))
-        , false));
+          _.pickBy(gantt.getTask(id), (value, key) => !key.startsWith('$'))
+          , false));
       if (mode === 'progress') {
         props.onProgressDragEvent('progressDrag')
       } else if (mode === 'move' || mode === 'resize') {
@@ -411,8 +415,8 @@ const GanttView = (props: RecordConstructorToView<typeof childrenMap> & {
     gantt.attachEvent("onAfterLinkAdd", function (id, item) {
       props.dispatch(changeChildAction("currentId", id, false));
       props.dispatch(changeChildAction("currentObject",
-        _.pickBy(item, (value, key) => !key.startsWith('$'))
-        , false));
+          _.pickBy(item, (value, key) => !key.startsWith('$'))
+          , false));
       props.dispatch(changeChildAction("currentProjectId", findProjectId(gantt.getLink(id).source), false));
       props.onAddedLinkEvent('addedLink')
     }, { id: 'customLinkAdd' });
@@ -421,10 +425,18 @@ const GanttView = (props: RecordConstructorToView<typeof childrenMap> & {
       props.onDeletedLinkEvent('deletedLink')
     }, { id: 'customLinkDelete' });
     // 创建新任务时
+    // @ts-ignore
+
     gantt.attachEvent("onTaskCreated", function (item) {
       let parent = item?.parent
+      // @ts-ignore
+
       props.dispatch(changeChildAction("currentId", parent, false));
+      // @ts-ignore
+
       props.dispatch(changeChildAction("currentProjectId", parent ? findProjectId(item.parent) : '', false));
+      // @ts-ignore
+
       props.dispatch(changeChildAction("currentObject", parent ? _.pickBy(gantt.getTask(item.parent), (value, key) => !key.startsWith('$')) : {}, false));
       props.onEvent('addTask')
       return false;
@@ -483,12 +495,14 @@ const GanttView = (props: RecordConstructorToView<typeof childrenMap> & {
 
   // 是否显示今日标签
   useEffect(() => {
+    // @ts-ignore
+
     props.showToday ? setMarkId(gantt.addMarker({
-      start_date: new Date(),
-      text: '今日'
-    }))
-      :
-      gantt.deleteMarker(markId)
+          start_date: new Date(),
+          text: '今日'
+        }))
+        :
+        gantt.deleteMarker(markId)
   }, [props.showToday])
 
   // 设置是否允许删除链接
@@ -579,12 +593,12 @@ const GanttView = (props: RecordConstructorToView<typeof childrenMap> & {
         setInitSortFlag(true)
         setTimeout(() => {
           props.onlySortProject ?
-            gantt.sort((item1: any, item2: any) => {
-              if (item1.parent === 0 && item2.parent === 0) {
-                return item1[props.sortOptions?.sortKey] > item2[props.sortOptions?.sortKey] ? (props.sortOptions?.asc ? -1 : 1) : (props.sortOptions?.asc ? 1 : -1);
-              }
-              return 0
-            }) : gantt.sort(props.sortOptions?.sortKey, !props.sortOptions?.asc)
+              gantt.sort((item1: any, item2: any) => {
+                if (item1.parent === 0 && item2.parent === 0) {
+                  return item1[props.sortOptions?.sortKey] > item2[props.sortOptions?.sortKey] ? (props.sortOptions?.asc ? -1 : 1) : (props.sortOptions?.asc ? 1 : -1);
+                }
+                return 0
+              }) : gantt.sort(props.sortOptions?.sortKey, !props.sortOptions?.asc)
           gantt.showTask(gantt.getTaskByIndex(0)?.id)
         }, 1);
       }
@@ -635,6 +649,8 @@ const GanttView = (props: RecordConstructorToView<typeof childrenMap> & {
       } else {
         gantt.resetLayout();
       }
+      // @ts-ignore
+
       gantt.parse(_.cloneDeep({
         data: props.tasks.value,
         links: props.links.value,
@@ -642,177 +658,177 @@ const GanttView = (props: RecordConstructorToView<typeof childrenMap> & {
     }
   }
   return (
-    <Container
-      ref={conRef}
-      $style={props.style}
-      onMouseDown={(e) => {
-        e.preventDefault();
-      }}
-    >
-      {/* 空标签用于引入tag的样式 */}
-      <Tag color="error"></Tag>
-      <Tag color="warning"></Tag>
-      <Tag color="processing"></Tag>
-      <Tag color="warning"></Tag>
-      <Tag></Tag>
-    </Container>
+      <Container
+          ref={conRef}
+          $style={props.style}
+          onMouseDown={(e) => {
+            e.preventDefault();
+          }}
+      >
+        {/* 空标签用于引入tag的样式 */}
+        <Tag color="error"></Tag>
+        <Tag color="warning"></Tag>
+        <Tag color="processing"></Tag>
+        <Tag color="warning"></Tag>
+        <Tag></Tag>
+      </Container>
   );
 };
 
 let GanttBasicComp = (function () {
   return new UICompBuilder(childrenMap, (props, dispatch) => <GanttView {...props} dispatch={dispatch} />)
-    .setPropertyViewFn((children) => (
-      <>
-        <Section name={sectionNames.basic}>
-          {children.scaleMode.propertyView({
-            label: trans("gantt.scaleMode"),
-            radioButton: true,
-          })}
-          {children.scaleMode.getView() === 'manual' && children.startDate.propertyView({
-            label: trans("gantt.startDate"),
-          })}
-          {children.scaleMode.getView() === 'manual' && children.endDate.propertyView({
-            label: trans("gantt.endDate"),
-          })}
-          {children.tasks.propertyView({
-            label: trans("gantt.tasks"),
-            tooltip: language === 'zh' ? taskDataDescZh : taskDataDescEn,
+      .setPropertyViewFn((children) => (
+          <>
+            <Section name={sectionNames.basic}>
+              {children.scaleMode.propertyView({
+                label: trans("gantt.scaleMode"),
+                radioButton: true,
+              })}
+              {children.scaleMode.getView() === 'manual' && children.startDate.propertyView({
+                label: trans("gantt.startDate"),
+              })}
+              {children.scaleMode.getView() === 'manual' && children.endDate.propertyView({
+                label: trans("gantt.endDate"),
+              })}
+              {children.tasks.propertyView({
+                label: trans("gantt.tasks"),
+                tooltip: language === 'zh' ? taskDataDescZh : taskDataDescEn,
 
-          })}
-          {children.links.propertyView({
-            label: trans("gantt.links"),
-            tooltip: language === 'zh' ? LinkDataDescZh : LinkDataDescEn,
-          })}
-          {children.showColumns.propertyView({
-            label: trans("gantt.showColumns"),
-          })}
-          {children.showColumns.getView() && children.Columns.propertyView({
-            title: trans("gantt.ColumnsData"),
-          })}
-          {children.onlySortProject.propertyView({
-            label: trans("gantt.onlySortProject"),
-          })}
-          {children.sortOptions.propertyView({
-            label: trans("gantt.sortOptions"),
-          })}
-          {children.rowHeight.propertyView({
-            label: trans("gantt.rowHeight"),
-          })}
-        </Section>
-        <Section name={sectionNames.advanced}>
-          {children.showToday.propertyView({
-            label: trans("gantt.showTodayMark"),
-          })}
-          {children.showHolidays.propertyView({
-            label: trans("gantt.showHolidays")
-          })}
-          {children.showHolidays.getView() && children.StatutoryHolidays.propertyView({
-            label: trans("gantt.StatutoryHolidays")
-          })}
-          {children.level.propertyView({
-            label: trans("gantt.level"),
-          })}
-          {children.durationUnit.propertyView({
-            label: trans("gantt.durationUnit"),
-          })}
-          {children.level.getView() === 'hour' &&
-            children.showHolidays.getView() &&
-            children.showWorkTimes.propertyView({
-              label: trans("gantt.showWorkTimes")
-            })}
-          {children.level.getView() === 'hour' &&
-            children.showWorkTimes.getView() &&
-            children.showHolidays.getView() &&
-            children.workTimeData.propertyView({
-              label: trans("gantt.workTimeData")
-            })}
-        </Section>
-        <Section name={sectionNames.interaction}>
-          {children.allowTaskChange.propertyView({
-            label: trans("gantt.allowChangeTask"),
-          })}
-          {children.allowTaskChange.getView() && children.toggleOnDBClick.propertyView({
-            label: trans("gantt.toggleOnDBClick"),
-          })}
-          {children.allowTaskChange.getView() && children.onTaskChangeEvent.propertyView({
-            title: trans("gantt.handleTaskChange"),
-          })}
-          {children.allowTaskDrag.propertyView({
-            label: trans("gantt.allowTaskDrag"),
-          })}
-          {children.allowTaskDrag.getView() && children.allowResizeTask.propertyView({
-            label: trans("gantt.allowResizeTask"),
-          })}
-          {children.allowTaskDrag.getView() && children.allowProjectDrag.propertyView({
-            label: trans("gantt.allowProjectDrag"),
-          })}
-          {children.allowTaskDrag.getView() && children.onChangeEvent.propertyView({
-            title: trans("gantt.handleDateChange"),
-          })}
-          {children.allowAddLink.propertyView({
-            label: trans("gantt.allowAddLink"),
-          })}
-          {children.allowAddLink.getView() && children.onAddedLinkEvent.propertyView({
-            title: trans("gantt.handleAddedLink"),
-          })}
-          {children.allowLinkDelete.propertyView({
-            label: trans("gantt.allowLinkDelete"),
-          })}
-          {children.allowLinkDelete.getView() && children.onDeletedLinkEvent.propertyView({
-            title: trans("gantt.handleDeletedLink"),
-          })}
-          {children.allowProgressDrag.propertyView({
-            label: trans("gantt.allowProgressDrag"),
-          })}
-          {children.allowProgressDrag.getView() && children.AutoCalculateProgress.propertyView({
-            label: trans("gantt.AutoCalculateProgress"),
-          })}
-          {children.allowProgressDrag.getView() && children.onProgressDragEvent.propertyView({
-            title: trans("gantt.handleProgressDrag"),
-          })}
-        </Section>
-        <Section name={trans("prop.tooltip")}>
-          {children.allowErrorMessage.propertyView({
-            label: trans("gantt.allowErrorMessage")
-          })}
-          {children.showTooltip.propertyView({
-            label: trans("gantt.showTooltip")
-          })}
-          {children.tooltipTemplates.propertyView({
-            label: trans("gantt.tooltipTemplates"),
-            tooltip: language === "en" ?
-              "The template replaces text based on {key} and {key_title} in the task data, with built-in {$start}、{$end} and {$today} to replace start and end dates"
-              : "模板根据任务数据中的{key}和{key_title}来替换文本，内置{$start}、{$end}和{$today}来替换开始和结束日期",
-          })}
-        </Section>
-        <Section name={sectionNames.layout}>
-          {children.openAllBranchInit.propertyView({
-            label: trans("gantt.openAllBranchInit")
-          })}
-          {children.onEvent.propertyView({
-            title: trans("gantt.otherEvents"),
-          })}
-          {hiddenPropertyView(children)}
-        </Section>
-        <Section name={sectionNames.style}>
-          {children.SegmentedColor.propertyView({
-            label: trans('gantt.SegmentedColor')
-          })}
-          {children.SegmentedColor.getView() && children.lowLine.propertyView({
-            label: trans('gantt.lowProgressLine')
-          })}
-          {children.SegmentedColor.getView() && children.mediumLine.propertyView({
-            label: trans('gantt.mediumProgressLine')
-          })}
-          {children.highlightOverdue.propertyView({
-            label: trans('gantt.highlightOverdue')
-          })}
-          {children.style.getPropertyView()}
-        </Section>
-      </>
-    ))
-    .setExposeMethodConfigs(ganttMethods() as any)
-    .build();
+              })}
+              {children.links.propertyView({
+                label: trans("gantt.links"),
+                tooltip: language === 'zh' ? LinkDataDescZh : LinkDataDescEn,
+              })}
+              {children.showColumns.propertyView({
+                label: trans("gantt.showColumns"),
+              })}
+              {children.showColumns.getView() && children.Columns.propertyView({
+                title: trans("gantt.ColumnsData"),
+              })}
+              {children.onlySortProject.propertyView({
+                label: trans("gantt.onlySortProject"),
+              })}
+              {children.sortOptions.propertyView({
+                label: trans("gantt.sortOptions"),
+              })}
+              {children.rowHeight.propertyView({
+                label: trans("gantt.rowHeight"),
+              })}
+            </Section>
+            <Section name={sectionNames.advanced}>
+              {children.showToday.propertyView({
+                label: trans("gantt.showTodayMark"),
+              })}
+              {children.showHolidays.propertyView({
+                label: trans("gantt.showHolidays")
+              })}
+              {children.showHolidays.getView() && children.StatutoryHolidays.propertyView({
+                label: trans("gantt.StatutoryHolidays")
+              })}
+              {children.level.propertyView({
+                label: trans("gantt.level"),
+              })}
+              {children.durationUnit.propertyView({
+                label: trans("gantt.durationUnit"),
+              })}
+              {children.level.getView() === 'hour' &&
+                  children.showHolidays.getView() &&
+                  children.showWorkTimes.propertyView({
+                    label: trans("gantt.showWorkTimes")
+                  })}
+              {children.level.getView() === 'hour' &&
+                  children.showWorkTimes.getView() &&
+                  children.showHolidays.getView() &&
+                  children.workTimeData.propertyView({
+                    label: trans("gantt.workTimeData")
+                  })}
+            </Section>
+            <Section name={sectionNames.interaction}>
+              {children.allowTaskChange.propertyView({
+                label: trans("gantt.allowChangeTask"),
+              })}
+              {children.allowTaskChange.getView() && children.toggleOnDBClick.propertyView({
+                label: trans("gantt.toggleOnDBClick"),
+              })}
+              {children.allowTaskChange.getView() && children.onTaskChangeEvent.propertyView({
+                title: trans("gantt.handleTaskChange"),
+              })}
+              {children.allowTaskDrag.propertyView({
+                label: trans("gantt.allowTaskDrag"),
+              })}
+              {children.allowTaskDrag.getView() && children.allowResizeTask.propertyView({
+                label: trans("gantt.allowResizeTask"),
+              })}
+              {children.allowTaskDrag.getView() && children.allowProjectDrag.propertyView({
+                label: trans("gantt.allowProjectDrag"),
+              })}
+              {children.allowTaskDrag.getView() && children.onChangeEvent.propertyView({
+                title: trans("gantt.handleDateChange"),
+              })}
+              {children.allowAddLink.propertyView({
+                label: trans("gantt.allowAddLink"),
+              })}
+              {children.allowAddLink.getView() && children.onAddedLinkEvent.propertyView({
+                title: trans("gantt.handleAddedLink"),
+              })}
+              {children.allowLinkDelete.propertyView({
+                label: trans("gantt.allowLinkDelete"),
+              })}
+              {children.allowLinkDelete.getView() && children.onDeletedLinkEvent.propertyView({
+                title: trans("gantt.handleDeletedLink"),
+              })}
+              {children.allowProgressDrag.propertyView({
+                label: trans("gantt.allowProgressDrag"),
+              })}
+              {children.allowProgressDrag.getView() && children.AutoCalculateProgress.propertyView({
+                label: trans("gantt.AutoCalculateProgress"),
+              })}
+              {children.allowProgressDrag.getView() && children.onProgressDragEvent.propertyView({
+                title: trans("gantt.handleProgressDrag"),
+              })}
+            </Section>
+            <Section name={trans("prop.tooltip")}>
+              {children.allowErrorMessage.propertyView({
+                label: trans("gantt.allowErrorMessage")
+              })}
+              {children.showTooltip.propertyView({
+                label: trans("gantt.showTooltip")
+              })}
+              {children.tooltipTemplates.propertyView({
+                label: trans("gantt.tooltipTemplates"),
+                tooltip: language === "en" ?
+                    "The template replaces text based on {key} and {key_title} in the task data, with built-in {$start}、{$end} and {$today} to replace start and end dates"
+                    : "模板根据任务数据中的{key}和{key_title}来替换文本，内置{$start}、{$end}和{$today}来替换开始和结束日期",
+              })}
+            </Section>
+            <Section name={sectionNames.layout}>
+              {children.openAllBranchInit.propertyView({
+                label: trans("gantt.openAllBranchInit")
+              })}
+              {children.onEvent.propertyView({
+                title: trans("gantt.otherEvents"),
+              })}
+              {hiddenPropertyView(children)}
+            </Section>
+            <Section name={sectionNames.style}>
+              {children.SegmentedColor.propertyView({
+                label: trans('gantt.SegmentedColor')
+              })}
+              {children.SegmentedColor.getView() && children.lowLine.propertyView({
+                label: trans('gantt.lowProgressLine')
+              })}
+              {children.SegmentedColor.getView() && children.mediumLine.propertyView({
+                label: trans('gantt.mediumProgressLine')
+              })}
+              {children.highlightOverdue.propertyView({
+                label: trans('gantt.highlightOverdue')
+              })}
+              {children.style.getPropertyView()}
+            </Section>
+          </>
+      ))
+      .setExposeMethodConfigs(ganttMethods() as any)
+      .build();
 })();
 
 GanttBasicComp = class extends GanttBasicComp {

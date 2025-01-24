@@ -25,7 +25,6 @@ const isVisualizerEnabled = !!process.env.ENABLE_VISUALIZER;
 // const browserCheckFileName = `browser-check-${process.env.REACT_APP_COMMIT_ID}.js`;
 const browserCheckFileName = `browser-check.js`;
 const base = ensureLastSlash(process.env.PUBLIC_URL);
-
 if (!apiProxyTarget && isDev) {
   console.log();
   console.log(chalk.red`LOWCODER_API_SERVICE_URL is required.\n`);
@@ -35,14 +34,15 @@ if (!apiProxyTarget && isDev) {
 }
 
 const proxyConfig: ServerOptions["proxy"] = {
-  "/api": {
+  "/backstage/bluesky/api": {
     target: apiProxyTarget,
-    changeOrigin: false,
+    changeOrigin: true,
+    rewrite: (path) => path.replace(/^\/backstage\/bluesky/, '/bluesky')
   },
 };
 
 if (nodeServiceApiProxyTarget) {
-  proxyConfig["/node-service"] = {
+  proxyConfig["/backstage/bluesky/node-service"] = {
     target: nodeServiceApiProxyTarget,
   };
 }
@@ -62,6 +62,8 @@ export const viteConfig: UserConfig = {
       "@lowcoder-ee": path.resolve(
         __dirname, "../lowcoder/src"
       ),
+      "@": path.resolve(__dirname, "src"),
+
     },
   },
   base,

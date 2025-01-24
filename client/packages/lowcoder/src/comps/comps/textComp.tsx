@@ -14,7 +14,6 @@ import { AnimationStyle, AnimationStyleType, TextStyle, TextStyleType, heightCal
 import { hiddenPropertyView } from "comps/utils/propertyUtils";
 import { trans } from "i18n";
 import { alignWithJustifyControl } from "comps/controls/alignControl";
-import { BoolControl } from "../controls/boolControl";
 
 import { MarginControl } from "../controls/marginControl";
 import { PaddingControl } from "../controls/paddingControl";

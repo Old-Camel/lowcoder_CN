@@ -15,9 +15,6 @@ import { SunburstChartCompWithDefault } from "./comps/sunburstChartComp/sunburst
 import { ThemeriverChartCompWithDefault } from "./comps/themeriverChartComp/themeriverChartComp";
 
 import { MermaidComp } from "./comps/mermaidComp";
-import { MeetingControllerComp } from "./comps/agoraMeetingComp/meetingControllerComp";
-import { VideoMeetingStreamComp } from "./comps/agoraMeetingComp/videoMeetingStreamComp";
-import { VideoSharingStreamComp } from "./comps/agoraMeetingComp/videoSharingStreamComp";
 import { BasicChartCompWithDefault } from "comps/basicChartComp/chartComp";
 
 export default {
@@ -38,7 +35,4 @@ export default {
   imageEditor: ImageEditorComp,
   calendar: CalendarComp,
   mermaid: MermaidComp,
-  meetingController: MeetingControllerComp,
-  meetingStream: VideoMeetingStreamComp,
-  meetingSharing: VideoSharingStreamComp,
 };

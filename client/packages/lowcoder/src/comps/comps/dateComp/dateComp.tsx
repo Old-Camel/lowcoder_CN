@@ -204,6 +204,7 @@ const DatePickerTmpCmp = new UICompBuilder(childrenMap, (props) => {
     inputFieldStyle:props.inputFieldStyle,
     animationStyle:props.animationStyle,
     onMouseDown: (e) => e.stopPropagation(),
+
     children: (
       <DateUIView
         picker={'date'}
@@ -530,36 +531,51 @@ export const weekPickerControl = new UICompBuilder(
     time = dayjs(props.value.value, DateParser);
   }
   const [activate , setActivate] =useState(false)
+      const handleDateZoneChange = (newTimeZone: any) => {
+        props.userTimeZone.onChange(newTimeZone)
+      }
   return props.label({
     required: props.required,
     style: props.style,
+    labelStyle: props.labelStyle,
+    inputFieldStyle:props.inputFieldStyle,
+    animationStyle:props.animationStyle,
+    onMouseDown: (e) => e.stopPropagation(),
+
     children: (
+
+
       <DateUIView
-        picker={'week'}
-        viewRef={props.viewRef}
-        disabledTime={() => disabledTime(props.minTime, props.maxTime)}
-        $style={props.style}
-        disabled={props.disabled}
-        {...datePickerProps(props)}
-        minDate={props.minDate}
-        maxDate={props.maxDate}
-        value={time.isValid() ? time : null}
-        onChange={(time) => {
-          handleDateChange(
-            time && time.isValid()
-              ? time.format(DATE_FORMAT)
-              : "",
-            props.value.onChange,
-            props.onEvent
-          );
-        }}
-        onPanelChange={() => {
-          handleDateChange("", props.value.onChange, noop);
-        }}
-        onFocus={() => {props.onEvent("focus");setActivate(true)}}
-        onBlur={() => props.onEvent("blur")}
-        suffixIcon={hasIcon(props.suffixIcon) && props.suffixIcon}
-      />
+          onClickDateTimeZone={handleDateZoneChange}
+
+          timeZone={props.timeZone}
+          picker={'week'}
+          viewRef={props.viewRef}
+          disabledTime={() => disabledTime(props.minTime, props.maxTime)}
+          $style={props.inputFieldStyle}
+          disabled={props.disabled}
+          {...datePickerProps(props)}
+          minDate={props.minDate}
+          maxDate={props.maxDate}
+          value={time.isValid() ? time : null}
+          onChange={(time) => {
+            handleDateChange(
+                time && time.isValid()
+                    ? time.format(DATE_FORMAT)
+                    : "",
+                props.value.onChange,
+                props.onEvent
+            );
+          }}
+          onPanelChange={() => {
+            handleDateChange("", props.value.onChange, noop);
+          }}
+          onFocus={() => {
+            props.onEvent("focus");
+            setActivate(true);
+          }}
+          onBlur={() => props.onEvent("blur")}
+          suffixIcon={hasIcon(props.suffixIcon) && props.suffixIcon}      />
     ),
     ... activate ? validate(props) : undefined,
   });
@@ -666,35 +682,42 @@ export const monthPickerControl = new UICompBuilder(
     time = dayjs(props.value.value, DateParser);
   }
   const [activate , setActivate] =useState(false)
+      const handleDateZoneChange = (newTimeZone: any) => {
+        props.userTimeZone.onChange(newTimeZone)
+      }
   return props.label({
     required: props.required,
     style: props.style,
     children: (
       <DateUIView
-        picker={'month'}
-        viewRef={props.viewRef}
-        disabledTime={() => disabledTime(props.minTime, props.maxTime)}
-        $style={props.style}
-        disabled={props.disabled}
-        {...datePickerProps(props)}
-        minDate={props.minDate}
-        maxDate={props.maxDate}
-        value={time.isValid() ? time : null}
-        onChange={(time) => {
-          handleDateChange(
-            time && time.isValid()
-              ? time.format(DATE_FORMAT)
-              : "",
-            props.value.onChange,
-            props.onEvent
-          );
-        }}
-        onPanelChange={() => {
-        }}
-        onFocus={() => {props.onEvent("focus");setActivate(true)}}
-        onBlur={() => props.onEvent("blur")}
-        suffixIcon={hasIcon(props.suffixIcon) && props.suffixIcon}
-      />
+          onClickDateTimeZone={handleDateZoneChange}
+          timeZone={props.timeZone}
+          picker={'month'}
+          viewRef={props.viewRef}
+          disabledTime={() => disabledTime(props.minTime, props.maxTime)}
+          $style={props.inputFieldStyle}
+          disabled={props.disabled}
+          {...datePickerProps(props)}
+          minDate={props.minDate}
+          maxDate={props.maxDate}
+          value={time.isValid() ? time : null}
+          onChange={(time) => {
+            handleDateChange(
+                time && time.isValid()
+                    ? time.format(DATE_FORMAT)
+                    : "",
+                props.value.onChange,
+                props.onEvent
+            );
+          }}
+          onPanelChange={() => {
+          }}
+          onFocus={() => {
+            props.onEvent("focus");
+            setActivate(true);
+          }}
+          onBlur={() => props.onEvent("blur")}
+          suffixIcon={hasIcon(props.suffixIcon) && props.suffixIcon}      />
     ),
     ... activate ? validate(props) : undefined,
   });
@@ -810,15 +833,20 @@ export const quarterPickerControl = new UICompBuilder(
     time = dayjs(props.value.value, DateParser);
   }
   const [activate , setActivate] =useState(false)
+      const handleDateZoneChange = (newTimeZone: any) => {
+        props.userTimeZone.onChange(newTimeZone)
+      }
   return props.label({
     required: props.required,
     style: props.style,
     children: (
       <DateUIView
+          onClickDateTimeZone={handleDateZoneChange}
+          timeZone={props.timeZone}
         picker={'quarter'}
         viewRef={props.viewRef}
         disabledTime={() => disabledTime(props.minTime, props.maxTime)}
-        $style={props.style}
+        $style={props.inputFieldStyle}
         disabled={props.disabled}
         {...datePickerProps(props)}
         minDate={props.minDate}
@@ -954,15 +982,20 @@ export const yearPickerControl = new UICompBuilder(
     time = dayjs(props.value.value, DateParser);
   }
   const [activate , setActivate] =useState(false)
+      const handleDateZoneChange = (newTimeZone: any) => {
+        props.userTimeZone.onChange(newTimeZone)
+      }
   return props.label({
     required: props.required,
     style: props.style,
     children: (
       <DateUIView
+          onClickDateTimeZone={handleDateZoneChange}
+          timeZone={props.timeZone}
         picker={'year'}
         viewRef={props.viewRef}
         disabledTime={() => disabledTime(props.minTime, props.maxTime)}
-        $style={props.style}
+        $style={props.inputFieldStyle}
         disabled={props.disabled}
         {...datePickerProps(props)}
         minDate={props.minDate}

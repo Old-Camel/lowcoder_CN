@@ -15,7 +15,6 @@ function getAxiosInstance() {
   if (axiosIns) {
     return axiosIns;
   }
-
   const apiRequestConfig: AxiosRequestConfig = {
     baseURL: `${_.trimEnd(sdkConfig.baseURL || SERVER_HOST, "/")}/api/`,
     timeout: REQUEST_TIMEOUT_MS,

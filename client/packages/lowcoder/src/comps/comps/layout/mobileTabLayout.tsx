@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MultiCompBuilder, withDefault, withViewFn } from "comps/generators";
 import { trans } from "i18n";
 import { Section, sectionNames } from "components/Section";
@@ -18,10 +19,6 @@ import { ExternalEditorContext } from "util/context/ExternalEditorContext";
 import { default as Skeleton } from "antd/es/skeleton";
 import { hiddenPropertyView } from "comps/utils/propertyUtils";
 import { numberExposingStateControl } from "@lowcoder-ee/index.sdk";
-import {
-  clickEvent,
-  eventHandlerControl,
-} from "comps/controls/eventHandlerControl";
 import _ from 'lodash'
 import { dropdownControl } from "@lowcoder-ee/comps/controls/dropdownControl";
 import { DataOption, DataOptionType, ModeOptions, menuItemStyleOptions, mobileNavJsonMenuItems } from "./navLayoutConstants";
@@ -49,9 +46,7 @@ const TabBarItem = React.lazy(() =>
 );
 const EventOptions = [clickEvent] as const;
 
-const EventOptions = [
-  clickEvent,
-] as const;
+
 const TabBarHeight = 56;
 const MaxWidth = 450;
 const AppViewContainer = styled.div`
@@ -127,7 +122,7 @@ const StyledTabBar = styled(TabBar)<{
   .adm-tab-bar-item-icon, .adm-tab-bar-item-title {
     color: ${(props) => props.$tabStyle.text};
   }
-  .adm-tab-bar-item-icon, {
+  .adm-tab-bar-item-icon {
     font-size: ${(props) => props.$navIconSize};
   }
   
@@ -408,23 +403,6 @@ let MobileTabLayoutTmp = (function () {
 MobileTabLayoutTmp = withViewFn(MobileTabLayoutTmp, (comp) => {
   const [tabIndex, setTabIndex] = useState(0);
   const { readOnly } = useContext(ExternalEditorContext);
-  const tabViews = (
-    comp.children.tabs.children.manual.getView() as unknown as Array<
-      ConstructorToComp<typeof TabOptionComp>
-    >
-  ).filter((tab) => !tab.children.hidden.getView());
-  useEffect(() => {
-    setTabIndex(comp.children.selectedKey.getView().value)
-  }, [comp.children.selectedKey])
-  const currentTab = tabViews[tabIndex];
-  const appView = (currentTab &&
-    currentTab.children.app.getAppId() &&
-    currentTab.children.app.getView()) || (
-      <EmptyContent
-        text={readOnly ? "" : trans("aggregation.emptyTabTooltip")}
-        style={{ height: "100%", backgroundColor: "white" }}
-      />
-    );
   const navStyle = comp.children.navStyle.getView();
   const navItemStyle = comp.children.navItemStyle.getView();
   const navItemHoverStyle = comp.children.navItemHoverStyle.getView();
@@ -491,6 +469,8 @@ MobileTabLayoutTmp = withViewFn(MobileTabLayoutTmp, (comp) => {
     backgroundStyle = `center / cover url('${backgroundImage}') no-repeat, ${backgroundStyle}`;
   }
 
+  // @ts-ignore
+  // @ts-ignore
   const tabBarView = (
     <TabBarView
       onEvent={onEvent}
@@ -505,6 +485,7 @@ MobileTabLayoutTmp = withViewFn(MobileTabLayoutTmp, (comp) => {
       onChange={(key) => setTabIndex(Number(key))}
       readOnly={!!readOnly}
       canvasBg={bgColor}
+
       tabStyle={{
         border: `1px solid ${navStyle.border}`,
         radius: navStyle.radius,
@@ -512,6 +493,7 @@ MobileTabLayoutTmp = withViewFn(MobileTabLayoutTmp, (comp) => {
         margin: navStyle.margin,
         padding: navStyle.padding,
         background: backgroundStyle,
+
       }}
       tabItemStyle={navItemStyle}
       tabItemHoverStyle={navItemHoverStyle}

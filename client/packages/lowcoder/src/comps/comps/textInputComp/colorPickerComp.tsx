@@ -79,7 +79,7 @@ export const ColorPickerComp = new UICompBuilder(childrenMap, (props) => {
           props.color.onChange({
             hex: value.toHexString().toUpperCase(),
             hsb: value.toHsb(),
-            rgb: value.toRgb(),
+            rgb: value.toRgb() as any,
           })
           props.onEvent('change')
         }}

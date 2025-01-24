@@ -1,7 +1,7 @@
 const buildVars = [
   {
     name: "PUBLIC_URL",
-    defaultValue: "/",
+    defaultValue: "/backstage/bluesky",
   },
   {
     name: "REACT_APP_EDITION",
@@ -9,7 +9,7 @@ const buildVars = [
   },
   {
     name: "REACT_APP_LANGUAGES",
-    defaultValue: "",
+    defaultValue: "zh",
   },
   {
     name: "REACT_APP_COMMIT_ID",
@@ -17,11 +17,11 @@ const buildVars = [
   },
   {
     name: "REACT_APP_API_SERVICE_URL",
-    defaultValue: "",
+    defaultValue: "/backstage/bluesky",
   },
   {
     name: "REACT_APP_NODE_SERVICE_URL",
-    defaultValue: "",
+    defaultValue: "/backstage/bluesky",
   },
   {
     name: "REACT_APP_ENV",

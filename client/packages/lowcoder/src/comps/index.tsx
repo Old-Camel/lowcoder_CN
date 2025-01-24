@@ -1,13 +1,9 @@
 import "comps/comps/layout/navLayout";
 import "comps/comps/layout/mobileTabLayout";
 import { ModalComp } from "comps/hooks/modalComp";
-import { ButtonComp } from "./comps/buttonComp/buttonComp";
 import { DropdownComp } from "./comps/buttonComp/dropdownComp";
 import { LinkComp } from "./comps/buttonComp/linkComp";
-import {
-  ContainerComp,
-  defaultContainerData,
-} from "./comps/containerComp/containerComp";
+
 import { CustomComp } from "./comps/customComp/customComp";
 import {
   DatePickerComp,
@@ -33,14 +29,8 @@ import { CheckboxComp } from "./comps/selectInputComp/checkboxComp";
 import { MultiSelectComp } from "./comps/selectInputComp/multiSelectComp";
 import { RadioComp } from "./comps/selectInputComp/radioComp";
 import { SegmentedControlComp } from "./comps/selectInputComp/segmentedControl";
-import { SelectComp } from "./comps/selectInputComp/selectComp";
 import { SwitchComp } from "./comps/switchComp";
-import { defaultTableData } from "./comps/tableComp/mockTableComp";
-import { TabbedContainerComp } from "./comps/tabs";
-import { TextComp } from "./comps/textComp";
-import { InputComp } from "./comps/textInputComp/inputComp";
 import { PasswordComp } from "./comps/textInputComp/passwordComp";
-import { TextAreaComp } from "./comps/textInputComp/textAreaComp";
 import { TimePickerComp, TimeRangeComp } from "./comps/dateComp/timeComp";
 import { defaultFormData, FormComp } from "./comps/formComp/formComp";
 import { IFrameComp } from "./comps/iframeComp";
@@ -61,10 +51,7 @@ import { JsonLottieComp } from "./comps/jsonComp/jsonLottieComp";
 import { ResponsiveLayoutComp } from "./comps/responsiveLayout";
 import { FloatButtonComp } from "./comps/buttonComp/floatButtonComp";
 import { GanttComp } from "./comps/gantee";
-import { TransferComp } from "./comps/TransferComp";
-import { ModuleComp } from "./comps/moduleComp/moduleComp";
-import { NavComp } from "./comps/navComp/navComp";
-import { TableComp } from "./comps/tableComp";
+import { TransferComp } from "@lowcoder-ee/comps/comps/transferComp";
 import { registerComp, UICompManifest, UICompType } from "./uiCompRegistry";
 import { QRCodeComp } from "./comps/qrCodeComp";
 import { JsonExplorerComp } from "./comps/jsonComp/jsonExplorerComp";
@@ -75,11 +62,7 @@ import { TreeSelectComp } from "./comps/treeComp/treeSelectComp";
 import cnchar from "cnchar";
 import { trans } from "i18n";
 import { remoteComp } from "./comps/remoteComp/remoteComp";
-import {
-  registerComp,
-  type UICompManifest,
-  type UICompType,
-} from "./uiCompRegistry";
+
 import { RemoteCompInfo } from "types/remoteComp";
 import { ScannerComp } from "./comps/buttonComp/scannerComp";
 import { SignatureComp } from "./comps/signatureComp";
@@ -1446,21 +1429,7 @@ var uiCompMap: Registry = mergeObject({
     },
   },
 
-  shape: {
-    name: trans("uiComp.shapeCompName"),
-    enName: "Shape",
-    description: trans("uiComp.shapeCompDesc"),
-    categories: ["multimedia", "dashboards"],
-    icon: ShapesCompIcon,
-    keywords: trans("uiComp.shapeCompKeywords"),
-    lazyLoad: true,
-    compName: "ShapeComp",
-    compPath: "comps/shapeComp/shapeComp",
-    layoutInfo: {
-      w: 12,
-      h: 40,
-    },
-  },
+
 
   jsonLottie: {
     name: trans("uiComp.jsonLottieCompName"),
@@ -1506,18 +1475,7 @@ var uiCompMap: Registry = mergeObject({
     },
   },
 
-  // added by Mousheng
-  colorPicker: {
-    name: trans("uiComp.colorPickerCompName"),
-    enName: "colorPicker",
-    description: trans("uiComp.colorPickerCompDesc"),
-    categories: ["multimedia"],
-    icon: ColorPickerCompIcon,
-    keywords: trans("uiComp.colorPickerCompKeywords"),
-    lazyLoad: true,
-    compName: "ColorPickerComp",
-    compPath: "comps/mediaComp/colorPickerComp",
-  },
+
 
   // item Handling
 
@@ -1730,225 +1688,8 @@ var uiCompMap: Registry = mergeObject({
     icon: TextCompIcon,
     keywords: trans("uiComp.textCompKeywords"),
     comp: TextComp,
-  },
+  }},{
 
-  colorPicker: {
-    name: trans("uiComp.colorPickerCompName"),
-    enName: "colorPicker",
-    description: trans("uiComp.colorPickerCompDesc"),
-    categories: ["forms"],
-    icon: ColorPickerIcon,
-    keywords: trans("uiComp.colorPickerCompKeywords"),
-    comp: ColorPickerComp,
-  },
-  weekPicker: {
-    name: trans("uiComp.weekPickerCompName"),
-    enName: "weekPicker",
-    description: trans("uiComp.weekPickerCompDesc"),
-    categories: ["forms", "scheduling"],
-    icon: WeekPickerIcon,
-    keywords: trans("uiComp.weekPickerCompKeywords"),
-    comp: WeekPickerComp,
-    layoutInfo: {
-      w: 6,
-      h: 5,
-    },
-  },
-  monthPicker: {
-    name: trans("uiComp.monthPickerCompName"),
-    enName: "monthPicker",
-    description: trans("uiComp.monthPickerCompDesc"),
-    categories: ["forms", "scheduling"],
-    icon: MonthPickerIcon,
-    keywords: trans("uiComp.monthPickerCompKeywords"),
-    comp: MonthPickerComp,
-    layoutInfo: {
-      w: 6,
-      h: 5,
-    },
-  },
-  quarterPicker: {
-    name: trans("uiComp.quarterPickerCompName"),
-    enName: "quarterPicker",
-    description: trans("uiComp.quarterPickerCompDesc"),
-    categories: ["forms", "scheduling"],
-    icon: QuarterPickerIcon,
-    keywords: trans("uiComp.quarterPickerCompKeywords"),
-    comp: QuarterPickerComp,
-    layoutInfo: {
-      w: 6,
-      h: 5,
-    },
-  },
-  yearPicker: {
-    name: trans("uiComp.yearPickerCompName"),
-    enName: "yearPicker",
-    description: trans("uiComp.yearPickerCompDesc"),
-    categories: ["forms", "scheduling"],
-    icon: YearPickerIcon,
-    keywords: trans("uiComp.yearPickerCompKeywords"),
-    comp: YearPickerComp,
-    layoutInfo: {
-      w: 6,
-      h: 5,
-    },
-  },
-  amap: {
-    name: trans("uiComp.amapCompName"),
-    enName: "amap",
-    description: trans("uiComp.amapCompDesc"),
-    categories: ["dashboards"],
-    icon: AmapIcon,
-    keywords: trans("uiComp.amapCompKeywords"),
-    comp: AmapComp,
-    layoutInfo: {
-      w: 15,
-      h: 50,
-    },
-  },
-  avatar: {
-    name: trans("uiComp.avatarCompName"),
-    enName: "avatar",
-    description: trans("uiComp.avatarCompDesc"),
-    categories: ["multimedia"],
-    icon: AvatarIcon,
-    keywords: trans("uiComp.avatarCompKeywords"),
-    comp: AvatarComp,
-    layoutInfo: {
-      w: 3,
-      h: 6,
-    },
-  },
-  descriptions: {
-    name: trans("uiComp.descriptionsName"),
-    enName: "descriptions",
-    description: trans("uiComp.descriptionsDesc"),
-    categories: ["projectmanagement"],
-    icon: DescriptionsIcon,
-    keywords: trans("uiComp.descriptionsKeywords"),
-    comp: DescriptionsComp,
-    layoutInfo: {
-      w: 13,
-      h: 40,
-    },
-  },
-  antLayout: {
-    name: trans("uiComp.antLayoutName"),
-    enName: "antLayout",
-    description: trans("uiComp.antLayoutDesc"),
-    categories: ["layout"],
-    icon: AntLayoutIcon,
-    keywords: trans("uiComp.antLayoutKeywords"),
-    comp: AntLayoutComp,
-    layoutInfo: {
-      w: 24,
-      h: 115,
-    },
-  },
-  floatButton: {
-    name: trans("uiComp.floatButtonCompName"),
-    enName: "floatButton",
-    description: trans("uiComp.floatButtonCompDesc"),
-    categories: ["forms"],
-    icon: FloatButtonIcon,
-    keywords: trans("uiComp.floatButtonCompKeywords"),
-    comp: FloatButtonComp,
-    layoutInfo: {
-      w: 0,
-      h: 0,
-    },
-    withoutLoading: true,
-  },
-  gantt: {
-    name: trans("uiComp.ganttName"),
-    enName: "gantt",
-    description: trans("uiComp.ganttDesc"),
-    categories: ["dashboards","scheduling"],
-    icon: GanttIcon,
-    keywords: trans("uiComp.ganttKeywords"),
-    comp: GanttComp,
-    layoutInfo: {
-      w: 18,
-      h: 45,
-    },
-  },
-  transfer: {
-    name: trans("uiComp.transferName"),
-    enName: "transfer",
-    icon: TransferIcon,
-    description: trans("uiComp.transferDesc"),
-    categories: ["forms"],
-    keywords: trans("uiComp.transferKeywords"),
-    comp: TransferComp,
-    layoutInfo: {
-      h: 47,
-      w: 13,
-    },
-  },
-  card: {
-    name: trans("uiComp.cardCompName"),
-    enName: "card",
-    icon: CardIcon,
-    description: trans("uiComp.cardCompDesc"),
-    categories: ["forms"],
-    keywords: trans("uiComp.cardCompKeywords"),
-    comp: CardComp,
-    layoutInfo: {
-      h: 47,
-      w: 4,
-    },
-  },
-  confetti: {
-    name: trans("uiComp.confettiCompName"),
-    enName: "confetti",
-    icon: ConfettiIcon,
-    description: trans("uiComp.confettiCompDesc"),
-    categories: ["multimedia"],
-    keywords: trans("uiComp.confettiCompKeywords"),
-    comp: ConfettiComp,
-    withoutLoading: true,
-  },
-  avatarGroup: {
-    name: trans("uiComp.avatarGroupCompName"),
-    enName: "avatarGroup",
-    icon: AvatarGroupIcon,
-    description: trans("uiComp.avatarGroupCompDesc"),
-    categories: ["multimedia"],
-    keywords: trans("uiComp.avatarGroupCompKeywords"),
-    comp: AvatarGroupComp,
-    withoutLoading: true,
-  },
-  timer: {
-    name: trans("uiComp.timerCompName"),
-    enName: "timer",
-    icon: TimerIcon,
-    description: trans("uiComp.timerCompDesc"),
-    categories: ["multimedia"],
-    keywords: trans("uiComp.timerCompKeywords"),
-    comp: TimerComp,
-    layoutInfo: {
-      h: 10,
-      w: 7,
-    },
-  },
-  steps: {
-    name: trans("uiComp.stepsCompName"),
-    enName: "steps",
-    icon: StepsIcon,
-    description: trans("uiComp.stepsCompDesc"),
-    categories: ["multimedia"],
-    keywords: trans("uiComp.stepsCompKeywords"),
-    comp: StepsComp,
-    layoutInfo: {
-      h: 10,
-      w: 17,
-    },
-  },
-  
-}
-// added by mousheng
-,
-{
   colorPicker: {
     name: trans("uiComp.colorPickerCompName"),
     enName: "colorPicker",

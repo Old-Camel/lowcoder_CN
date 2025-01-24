@@ -9,6 +9,7 @@ import {
   UnfoldIcon,
   LeftShow,
 } from "lowcoder-design";
+
 import React, { useCallback, useContext, useMemo, useState, useEffect, useRef } from "react";
 import _, { get, set } from "lodash";
 import styled from "styled-components";
@@ -40,6 +41,7 @@ import {
 } from "util/localStorageUtil";
 import { default as DownOutlined } from "@ant-design/icons/DownOutlined";
 import ThemeSettingsSelector from "components/ThemeSettingsSelector";
+import {ItemType} from "antd/es/menu/interface";
 
 export type DisabledCollisionStatus = "true" | "false"; // "true" means collision is not enabled - Layering works, "false" means collision is enabled - Layering does not work
 export type ToggleCollisionStatus = (collisionStatus?: DisabledCollisionStatus) => void;
@@ -170,10 +172,49 @@ export const LeftLayersContent = (props: LeftLayersContentProps) => {
     saveCollisionStatus(collisionStatus);
   }, [collisionStatus])
 
+  const getCheckedKeys = () => {
+    return checkedKeys;
+  }
 
+  const getActionValue = () => {
+    return actionValue;
+  }
+
+  const handleComponentsActions = useCallback((actionType: string) => {
+    const value = getActionValue();
+    for (let key of getCheckedKeys()) {
+      const node = getTreeNodeByKey(componentTreeData, key);
+      const comp = editorState.getUICompByName(node.title);
+      if(comp) {
+        const { children } = comp.children.comp;
+        const compType = comp.children.compType.getView();
+        const types = actionType.split('.');
+        if(types.length === 1) { // e.g hidden, disabled
+          children[types[0]]?.dispatchChangeValueAction(value);
+        }
+        else if(types.length === 2) { // nested object e.g. style.background
+          // console.log(children[types[0]]);
+          if (!children[types[0]]) {
+            if (children[compType].children[types[0]]?.children[types[1]]) {
+              children[compType].children[types[0]].children[types[1]]?.dispatchChangeValueAction(value);
+            }
+          }
+          else {
+            if (children[types[0]].children[types[1]]) {
+              children[types[0]].children[types[1]]?.dispatchChangeValueAction(value);
+            }
+            else {
+              children[types[0]][types[1]]?.dispatchChangeValueAction(value);
+            }
+          }
+        }
+      }
+    }
+  }, [getActionValue, getCheckedKeys]);
   const handleActionSelection = useCallback((key: string) => {
     setSelectedActionKey(key);
-  }, []);
+    setPlaceholderText(getPlaceholderText(key));
+  }, [handleComponentsActions]);
 
   const handleToggleLayer = (checked: boolean) => {
     editorState.rootComp.children.settings.children.disableCollision.dispatchChangeValueAction(
@@ -342,7 +383,44 @@ export const LeftLayersContent = (props: LeftLayersContentProps) => {
   };
 
   // here we handle the checked keys of the component tree
-
+  const layerActions: ItemType[] = [
+    {
+      label: trans("leftPanel.hideComponent"),
+      key: 'hidden',
+    },
+    {
+      label: trans("leftPanel.disableComponent"),
+      key: 'disable',
+    },
+    {
+      label: trans("leftPanel.margin"),
+      key: 'style.margin',
+    },
+    {
+      label: trans("leftPanel.padding"),
+      key: 'style.padding',
+    },
+    {
+      label: trans("leftPanel.borderRadius"),
+      key: 'style.radius',
+    },
+    {
+      label: trans("leftPanel.borderWidth"),
+      key: 'style.borderWidth',
+    },
+    {
+      label: trans("leftPanel.fontSize"),
+      key: 'style.textSize',
+    },
+    {
+      label: trans("leftPanel.fontWeight"),
+      key: 'style.textWeight',
+    },
+    {
+      label: trans("leftPanel.fontFamily"),
+      key: 'style.fontFamily',
+    }
+  ];
   const getPlaceholderText = useCallback((key: string) => {
     switch (key) {
       case 'hidden':
@@ -451,45 +529,7 @@ export const LeftLayersContent = (props: LeftLayersContentProps) => {
     editorState.setSelectedCompNames(checkedComponents, "leftPanel");
   }
 
-  const getCheckedKeys = () => {
-    return checkedKeys;
-  }
-  
-  const getActionValue = () => {
-    return actionValue;
-  }
 
-  const handleComponentsActions = useCallback((actionType: string) => {
-    const value = getActionValue();
-    for (let key of getCheckedKeys()) {
-      const node = getTreeNodeByKey(componentTreeData, key);
-      const comp = editorState.getUICompByName(node.title);
-      if(comp) {
-        const { children } = comp.children.comp;
-        const compType = comp.children.compType.getView();
-        const types = actionType.split('.');
-        if(types.length === 1) { // e.g hidden, disabled
-          children[types[0]]?.dispatchChangeValueAction(value);
-        }
-        else if(types.length === 2) { // nested object e.g. style.background
-          // console.log(children[types[0]]);
-          if (!children[types[0]]) {
-            if (children[compType].children[types[0]]?.children[types[1]]) {
-              children[compType].children[types[0]].children[types[1]]?.dispatchChangeValueAction(value);
-            }
-          }
-          else {
-            if (children[types[0]].children[types[1]]) {
-              children[types[0]].children[types[1]]?.dispatchChangeValueAction(value);
-            }
-            else {
-              children[types[0]][types[1]]?.dispatchChangeValueAction(value);
-            }
-          }
-        }
-      }
-    }
-  }, [getActionValue, getCheckedKeys]);
   
   const getTreeUI = () => {
     // here the components get sorted by name

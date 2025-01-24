@@ -9,13 +9,13 @@ type transToNodeType = (key: any, variables?: any) => ReactNode;
 
 let trans: transType;
 let transToNode: transToNodeType;
-let language = 'en';
+let language = 'zh';
 
 export const initTranslator = (lang?: string) => {
   const translator =  new Translator<typeof localeData.en>(
       localeData,
       REACT_APP_LANGUAGES,
-      [lang || 'en']
+      [lang || 'zh']
   );
 
   language = translator.language;

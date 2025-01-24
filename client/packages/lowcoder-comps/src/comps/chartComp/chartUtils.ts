@@ -11,7 +11,9 @@ import _ from "lodash";
 import { chartColorPalette, isNumeric, JSONObject } from "lowcoder-sdk";
 import { calcXYConfig } from "comps/chartComp/chartConfigs/cartesianAxisConfig";
 import Big from "big.js";
+import {EChartsOptionWithMap} from "../basicChartComp/reactEcharts";
 
+// @ts-ignore
 export function transformData(
   originData: JSONObject[],
   xAxis: string,
@@ -106,6 +108,7 @@ export function getSeriesConfig(props: EchartsConfigProps) {
     } else {
       // pie
       const radiusAndCenter = getPieRadiusAndCenter(seriesLength, index, props.chartConfig);
+      // @ts-ignore
       return {
         ...props.chartConfig,
         radius: radiusAndCenter.radius,
@@ -127,6 +130,7 @@ export function getEchartsConfig(
   chartSize?: ChartSize,
   theme?: any,
 ): EChartsOptionWithMap {
+
   if (props.mode === "json") {
     return props.echartsOption ? props.echartsOption : {};
   }
@@ -138,7 +142,7 @@ export function getEchartsConfig(
     top: 50,
     bottom: 35,
   };
-  let config: EChartsOption = {
+  let config: EChartsOptionWithMap = {
     title: { text: props.title, left: "center" },
     tooltip: {
       confine: true,

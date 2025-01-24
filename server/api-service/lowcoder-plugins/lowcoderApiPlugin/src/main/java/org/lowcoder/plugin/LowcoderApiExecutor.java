@@ -88,7 +88,7 @@ public class LowcoderApiExecutor implements QueryExecutor<LowcoderApiDatasourceC
             return Mono.just(QueryExecutionResult.success(emptyList()));
         }
 
-        String url = "http://localhost:" + context.getPort() + "/api/v1/organizations/" + context.getApplicationOrgId() + "/members";
+        String url = "http://localhost:" + context.getPort() + "/bluesky/api/v1/organizations/" + context.getApplicationOrgId() + "/members";
 
         return WebClient.builder()
                 .defaultCookies(injectCookies(context))
@@ -122,7 +122,7 @@ public class LowcoderApiExecutor implements QueryExecutor<LowcoderApiDatasourceC
             folderParam = "?id=" + context.getFolderName();
         }
 
-        String url = "http://localhost:" + context.getPort() + "/api/folders/elements" + folderParam;
+        String url = "http://localhost:" + context.getPort() + "/bluesky/api/folders/elements" + folderParam;
 
         return WebClient.builder()
                 .defaultCookies(injectCookies(context))

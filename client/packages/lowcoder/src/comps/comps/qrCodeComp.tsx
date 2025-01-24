@@ -17,7 +17,7 @@ import styled, { css } from "styled-components";
 import { useEffect, useRef, useState, useContext } from "react";
 import { stateComp, withDefault } from "../generators";
 import { EditorContext } from "comps/editorState";
-import { withDefault } from "../generators";
+// import {QRCode } from "qrcode.react";
 
 // TODO: add styling for image (size)
 // TODO: add styling for bouding box (individual backround)
@@ -73,6 +73,8 @@ const EventOptions = [clickEvent, refreshEvent] as const;
 const childrenMap = {
   value: withDefault(stringExposingStateControl("value"), 'https://lowcoder.mousheng.top'),
   level: dropdownControl(levelOptions, "M"),
+  includeMargin: BoolControl.DEFAULT_TRUE,
+
   image: StringControl,
   style: styleControl(QRCodeStyle),
   statusOption: dropdownControl(statusOptions, 'active'),
@@ -150,43 +152,41 @@ const QRCodeView = (props: RecordConstructorToView<typeof childrenMap> & { dispa
     props.onEvent('refresh');
   }
   return (
-    <div
-      style={{
-        margin: props.style.margin,
-        padding: props.includeMargin ? props.style.padding : 0,
-        width: widthCalculator(props.style.margin),
-        height: heightCalculator(props.style.margin),
-        background: props.style.background,
-        borderRadius: props.style.radius,
-        border: `${props.style.borderWidth ? props.style.borderWidth : "1px"} solid ${
-          props.style.border
-          }`,
-        rotate: props.style.rotation,
-        animation: props.animationStyle.animation,
-        animationDelay: props.animationStyle.animationDelay,
-        animationDuration: props.animationStyle.animationDuration,
-        animationIterationCount:props.animationStyle.animationIterationCount
-      }}
-    >
-      <QRCodeSVG
-        value={value}
-        level={props.level}
-        width="100%"
-        height="100%"
-        bgColor={props.style.background}
-        fgColor={props.style.color}
-        includeMargin={false}
-        imageSettings={
-          props.image ? { src: props.image, width: 0, height: 0, excavate: true } : undefined
-        }
-      />
-    </div>
+      <ReactResizeDetector onResize={onResize}>
+        <Container
+            id={props.compID}
+            ref={conRef}
+            $style={props.style}
+            onClick={(e) => {
+              props.onEvent("click")
+            }}
+        >
+          {
+            (
+                <QRCode
+                    value={value || '-'}
+                    icon={image}
+                    status={props.status.value as "active" | "expired" | "loading"}
+                    onRefresh={onRefresh}
+                    color={props.style.color}
+                    bgColor={props.style.background}
+                    errorLevel={props.level}
+                    type={renderType}
+                    size={height > width ? width - 5 : height}
+                    iconSize={height > width ? width / 4 : height / 4}
+                    style={{
+                      borderRadius: props.style.radius,
+                    }}
+                />
+            )}
+        </Container>
+      </ReactResizeDetector >
   );
 };
 
 let QRCodeBasicComp = (function () {
-  return new UICompBuilder(childrenMap, (props) => {
-    return( <QRCodeView {...props} />)})
+  return new UICompBuilder(childrenMap, (props,dispatch) => {
+    return( <QRCodeView dispatch={dispatch} {...props} />)})
     .setPropertyViewFn((children) => (
       <>
         <Section name={sectionNames.basic}>

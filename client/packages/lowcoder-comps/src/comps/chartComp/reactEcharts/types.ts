@@ -1,5 +1,5 @@
 import { CSSProperties } from "react";
-
+export type EChartsOptionWithMap = EChartsOption;
 export type EChartsOption = any;
 
 export type EChartsInstance = any;
@@ -28,7 +28,7 @@ export type EChartsReactProps = {
   /**
    * echarts option
    */
-  readonly option: EChartsOption;
+  readonly option: EChartsOptionWithMap;
   /**
    * echarts theme config, can be:
    * 1. theme name string

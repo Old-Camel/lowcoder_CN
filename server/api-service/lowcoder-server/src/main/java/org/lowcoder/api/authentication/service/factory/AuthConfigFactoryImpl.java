@@ -36,9 +36,8 @@ public class AuthConfigFactoryImpl implements AuthConfigFactory {
                 AuthTypeConstants.GITHUB,
                 AuthTypeConstants.GOOGLE,
                 AuthTypeConstants.ORY,
-                AuthTypeConstants.KEYCLOAK,
                 AuthTypeConstants.FEISHU,
-                AuthTypeConstants.DINGTALK
+                AuthTypeConstants.DINGTALK,
                 AuthTypeConstants.KEYCLOAK,
                 AuthTypeConstants.GENERIC
         );

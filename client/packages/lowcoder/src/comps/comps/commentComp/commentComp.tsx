@@ -18,7 +18,7 @@ import { jsonControl, StringControl } from "comps/controls/codeControl";
 // 事件控制
 import { clickEvent, submitEvent, eventHandlerControl, deleteEvent, mentionEvent, } from "comps/controls/eventHandlerControl";
 // 引入样式
-import { CommentStyle, heightCalculator, widthCalculator, } from "comps/controls/styleControlConstants";
+import { CommentStyle, heightCalculator, widthCalculator,AnimationStyle } from "comps/controls/styleControlConstants";
 // 初始化暴露值
 import { stateComp, valueComp } from "comps/generators/simpleGenerators";
 // 组件对外暴露属性的api

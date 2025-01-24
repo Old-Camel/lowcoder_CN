@@ -133,7 +133,7 @@ public class Oauth2AuthRequestFactory implements AuthRequestFactory<OAuth2Reques
                 GOOGLE,
                 ORY,
                 KEYCLOAK,
-                GENERIC
+                GENERIC,
                 FEISHU,
                 DINGTALK);
     }

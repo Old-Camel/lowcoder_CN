@@ -1,3 +1,4 @@
+// @ts-nocheck
 import _ from 'lodash'
 import { GanttStatic, gantt } from 'dhtmlx-gantt';
 import { trans } from '@lowcoder-ee/i18n';

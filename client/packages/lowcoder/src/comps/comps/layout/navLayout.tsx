@@ -202,6 +202,8 @@ let NavTmpLayout = (function () {
     navItemStyle: styleControl(NavLayoutItemStyle, 'navItemStyle'),
     navItemHoverStyle: styleControl(NavLayoutItemHoverStyle, 'navItemHoverStyle'),
     navItemActiveStyle: styleControl(NavLayoutItemActiveStyle, 'navItemActiveStyle'),
+    collapsible: BoolControl,
+
   };
   return new MultiCompBuilder(childrenMap, (props) => {
     return null;
@@ -574,6 +576,8 @@ NavTmpLayout = withViewFn(NavTmpLayout, (comp) => {
     <StyledMenu
       items={menuItems}
       mode={navMode}
+      collapsible={collapsible}
+      collapsed={collapsed}
       style={{
         height: `calc(100% - ${getVerticalMargin(navStyle.margin.split(' '))})`,
         width: `calc(100% - ${getHorizontalMargin(navStyle.margin.split(' '))})`,
@@ -605,7 +609,14 @@ NavTmpLayout = withViewFn(NavTmpLayout, (comp) => {
           { navMenu }
         </Header>
       ) : (
-        <StyledSide theme="light" width={navWidth} collapsed={navCollapse}>
+        <StyledSide
+            theme="light"
+            width={navWidth}
+            collapsed={navCollapse}
+            onCollapse={(value) => setCollapsed(value)}
+            collapsible={collapsible}
+            NavLayoutStyle={navStyle}
+        >
           {navMenu}
         </StyledSide>
       )}

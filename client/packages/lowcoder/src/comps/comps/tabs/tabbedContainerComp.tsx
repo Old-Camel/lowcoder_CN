@@ -314,7 +314,9 @@ const TabbedContainer = (props: TabbedContainerProps) => {
               $headerStyle={headerStyle}
               $bodyStyle={bodyStyle}
               $showHeader={showHeader}
-              onChange={(key) => {
+              $autoHeight={props.autoHeight}
+
+            onChange={(key) => {
                 if (key !== props.selectedTabKey.value) {
                   props.selectedTabKey.onChange(key);
                   props.onEvent("change");
@@ -324,7 +326,7 @@ const TabbedContainer = (props: TabbedContainerProps) => {
               animated
               $isMobile={isMobile}
               items={tabItems}
-            tabPosition={props.position ?? "top"}
+            // tabPosition={props.position ?? "top"}
 
             tabBarGutter={props.tabsGutter}
               centered={props.tabsCentered}

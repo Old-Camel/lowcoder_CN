@@ -146,14 +146,14 @@ public class SecurityConfig {
                         ServerWebExchangeMatchers.pathMatchers(HttpMethod.GET, NewUrl.ORGANIZATION_URL + "/byuser/*"),
                         ServerWebExchangeMatchers.pathMatchers(HttpMethod.GET, NewUrl.DATASOURCE_URL + "/jsDatasourcePlugins"),
                         ServerWebExchangeMatchers.pathMatchers(HttpMethod.GET, NewUrl.NPM_REGISTRY + "/**"),
-                        ServerWebExchangeMatchers.pathMatchers(HttpMethod.GET, "/api/docs/**")
+                        ServerWebExchangeMatchers.pathMatchers(HttpMethod.GET, "/bluesky/api/docs/**")
                 )
                 .permitAll()
-                .pathMatchers("/api/plugins/**")
+                .pathMatchers("/bluesky/api/plugins/**")
                 .permitAll()
-                .pathMatchers("/api/**")
+                .pathMatchers("/bluesky/api/**")
                 	.authenticated()
-                .pathMatchers("/test/**")
+                .pathMatchers("/bluesky/test/**")
                 	.authenticated()
                 .pathMatchers("/**")
                 	.permitAll()

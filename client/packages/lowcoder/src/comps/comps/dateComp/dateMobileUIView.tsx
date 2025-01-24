@@ -86,7 +86,10 @@ const DateItem = styled.div`
 `;
 
 export const DateMobileUIView = (props: DataUIViewProps) => (
-  <MobileView ref={props.viewRef} $style={props.$style} onClick={() => handleClick(props)}>
+  <MobileView ref={props.viewRef} $style={props.$style} onClick={() => handleClick({
+      ...props,
+      value: props.value || null  // 确保传入的 value 不是 undefined
+  })}>
     <DateItem>
       {props.value
         ? props.value.format(props.format || (props.showTime ? DATE_TIME_FORMAT : DATE_FORMAT))

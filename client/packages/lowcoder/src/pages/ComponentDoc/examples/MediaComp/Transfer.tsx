@@ -1,8 +1,9 @@
-import { TransferComp } from "comps/comps/transferComp";
+import { TransferComp } from "@lowcoder-ee/comps/comps/transferComp";
 import Example from "../../common/Example";
 import ExampleGroup from "../../common/ExampleGroup";
 
 export default function TransferExample() {
+  
     return (
       <>
         <ExampleGroup

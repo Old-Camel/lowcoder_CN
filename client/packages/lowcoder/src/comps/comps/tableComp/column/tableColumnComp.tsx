@@ -34,7 +34,6 @@ import { list } from "@lowcoder-ee/comps/generators/list";
 import { EMPTY_ROW_KEY } from "../tableCompView";
 export type Render = ReturnType<ConstructorToComp<typeof RenderComp>["getOriginalComp"]>;
 export const RenderComp = withSelectedMultiContext(ColumnTypeComp);
-import { TableColumnLinkStyle, styleControl } from "@lowcoder-ee/index.sdk";
 
 const columnWidthOptions = [
   {

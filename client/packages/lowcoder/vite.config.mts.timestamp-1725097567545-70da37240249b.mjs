@@ -26,7 +26,7 @@ function ensureLastSlash(str) {
 var buildVars = [
   {
     name: "PUBLIC_URL",
-    defaultValue: "/"
+    defaultValue: "/backstage/bluesky/"
   },
   {
     name: "REACT_APP_EDITION",
@@ -34,7 +34,7 @@ var buildVars = [
   },
   {
     name: "REACT_APP_LANGUAGES",
-    defaultValue: ""
+    defaultValue: "cn"
   },
   {
     name: "REACT_APP_COMMIT_ID",
@@ -42,11 +42,11 @@ var buildVars = [
   },
   {
     name: "REACT_APP_API_SERVICE_URL",
-    defaultValue: ""
+    defaultValue: "/backstage/bluesky"
   },
   {
     name: "REACT_APP_NODE_SERVICE_URL",
-    defaultValue: ""
+    defaultValue: "/backstage/bluesky"
   },
   {
     name: "REACT_APP_ENV",

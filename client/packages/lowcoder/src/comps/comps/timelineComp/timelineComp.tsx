@@ -42,7 +42,6 @@ import { timelineDate, timelineNode, TimelineDataTooltip } from "./timelineConst
 import { convertTimeLineData } from "./timelineUtils";
 import { default as Timeline } from "antd/es/timeline";
 
-import styled from "styled-components";
 import { debounce } from "lodash";
 
 import { EditorContext } from "comps/editorState";

@@ -73,7 +73,6 @@ import { MentionComp } from "./comps/textInputComp/mentionComp";
 import { AutoCompleteComp } from "./comps/autoCompleteComp/autoCompleteComp";
 import { JsonLottieComp } from "./comps/jsonComp/jsonLottieComp";
 import { ResponsiveLayoutComp } from "./comps/responsiveLayout";
-import { ControlButton } from "./comps/meetingComp/controlButton";
 
 import {
   AudioCompIcon,
@@ -752,20 +751,7 @@ var uiCompMap: Registry = {
     },
     withoutLoading: true,
   },
-  controlButton: {
-    name: trans("meeting.meetingControlCompName"),
-    enName: "Controls",
-    description: trans("meeting.meetingCompDesc"),
-    categories: ["forms", "collaboration"],
-    icon: ButtonCompIcon,
-    keywords: trans("meeting.meetingCompKeywords"),
-    comp: ControlButton,
-    withoutLoading: true,
-    layoutInfo: {
-      w: 3,
-      h: 6,
-    },
-  },
+
   dropdown: {
     name: trans("uiComp.dropdownCompName"),
     enName: "Dropdown",

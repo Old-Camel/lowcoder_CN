@@ -190,3 +190,16 @@ Image can be configured by setting environment variables.
 | `LOWCODER_NODE_SERVICE_URL`     | Lowcoder Node service (js executor) URL                             | `http://localhost:6060`                                 |
 
 
+
+
+
+docker run -d --name lowcoder \
+  -p 3000:3000 \
+  -e LOWCODER_MONGODB_ENABLED=false \
+  -e LOWCODER_REDIS_ENABLED=false \
+  -e LOWCODER_MONGODB_URL="mongodb://222.30.194.61:27017/lowcoder?retryWrites=true&loadBalanced=false&connectTimeoutMS=10000" \
+  -e LOWCODER_REDIS_URL="redis://:yunzai@222.30.194.61:6379" \
+  -e LOWCODER_EMAIL_SIGNUP_ENABLED=false \
+  -e LOWCODER_SUPERUSER_USERNAME="yunzai" \
+  -e LOWCODER_SUPERUSER_PASSWORD="123.comM" \
+  222.30.195.183:10000/cloud/bluesky:v1

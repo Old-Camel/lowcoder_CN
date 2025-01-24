@@ -41,7 +41,7 @@ const FooterWrapper = styled.div<{ showLastLine?: boolean }>`
   padding: ${(props) => props?.showLastLine ? '3px' : '0px'};
 `;
 
-const BodyWrapper = styled.div<{ $autoHeight: boolean }>`
+const BodyWrapper = styled.div<{ $autoHeight: boolean, $style?: any, showLastLine: boolean }>`
   overflow: ${(props) => (!props.$autoHeight ? "auto" : "hidden")}; 
   height: ${(props) => (props.$autoHeight ? "auto" : "calc(100% - 32px)")};
    & > div {
@@ -195,7 +195,9 @@ export function ListView(props: Props) {
   );
   const horizontalGridCells = useMemo(() => children.horizontalGridCells.getView(), [children.horizontalGridCells]);
   const autoHeight = useMemo(() => children.autoHeight.getView(), [children.autoHeight]);
-  const showHorizontalScrollbar = useMemo(() => children.showHorizontalScrollbar.getView(), [children.showHorizontalScrollbar]);
+    const scrollbars = useMemo(() => children.scrollbars.getView(), [children.scrollbars]);
+
+    const showHorizontalScrollbar = useMemo(() => children.showHorizontalScrollbar.getView(), [children.showHorizontalScrollbar]);
   const showVerticalScrollbar = useMemo(() => children.showVerticalScrollbar.getView(), [children.showVerticalScrollbar])
   const horizontal = useMemo(() => children.horizontal.getView(), [children.horizontal]);
   const minHorizontalWidth = useMemo(() => children.minHorizontalWidth.getView(), [children.minHorizontalWidth]);
@@ -295,7 +297,7 @@ export function ListView(props: Props) {
   return (
     <BackgroundColorContext.Provider value={style.background}>
       <ListViewWrapper $style={style} $paddingWidth={paddingWidth} $animationStyle={animationStyle}>
-        <BodyWrapper ref={ref} $autoHeight={autoHeight}>
+        <BodyWrapper ref={ref} $autoHeight={autoHeight} showLastLine={showLastLine} $style={style}>
             {scrollbars ? (
 
                 <ScrollBar style={{ height: autoHeight ? "auto" : "100%", margin: "0px", padding: "0px" }} hideScrollbar={horizontal ? !showHorizontalScrollbar : !showVerticalScrollbar} overflow={autoHeight ? horizontal ? 'scroll' : 'hidden' : 'scroll'}>

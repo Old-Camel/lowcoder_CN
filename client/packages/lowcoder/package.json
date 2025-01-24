@@ -41,6 +41,7 @@
     "axios": "^1.7.7",
     "buffer": "^6.0.3",
     "clsx": "^2.0.0",
+    "cnchar": "^3.2.4",
     "copy-to-clipboard": "^3.3.3",
     "core-js": "^3.25.2",
     "dhtmlx-gantt": "^8.0.6",

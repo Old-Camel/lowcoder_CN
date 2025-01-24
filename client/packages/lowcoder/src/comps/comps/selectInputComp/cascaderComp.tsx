@@ -1,5 +1,5 @@
 import { default as Cascader } from "antd/es/cascader";
-import { CascaderStyleType } from "comps/controls/styleControlConstants";
+import { CascaderStyleType,ChildrenMultiSelectStyleType } from "comps/controls/styleControlConstants";
 import { blurMethod, focusMethod } from "comps/utils/methodUtils";
 import { trans } from "i18n";
 import styled from "styled-components";
@@ -11,6 +11,7 @@ import { JSONObject, useIsMobile } from "lowcoder-sdk";
 import _ from "lodash";
 import { SelectInputInvalidConfig, useSelectInputValidate } from "./selectInputConstants";
 import { Fragment, useState, useEffect } from "react";
+import { Cascader as MobileCascader } from "antd-mobile";
 
 const CascaderStyle = styled(Cascader)<{ $style: CascaderStyleType,$childrenInputFieldStyle:ChildrenMultiSelectStyleType }>`
   width: 100%;
@@ -61,6 +62,7 @@ const CascaderBasicComp = (function () {
       props.selectedObject.onChange(findLabelsWithChildren(props.options, props.value.value))
     }, [])
 
+    // @ts-ignore
     return props.label({
       required: props.required,
       style: props.style,
@@ -79,7 +81,9 @@ const CascaderBasicComp = (function () {
             allowClear={props.allowClear}
             placeholder={props.placeholder}
             showSearch={props.showSearch}
-            $style={props.style}
+            // $style={props.style}
+            $style={props.inputFieldStyle}
+
             $childrenInputFieldStyle={props.childrenInputFieldStyle}
 
             open={isMobile ? false : undefined}
@@ -90,7 +94,7 @@ const CascaderBasicComp = (function () {
             onBlur={() => {
               props.onEvent("blur")
             }}
-            onChange={(value: (string | number)[], selectOptions) => {
+            onChange={(value: (string | number | null)[], selectOptions) => {
               handleValidate(value);
               props.value.onChange(value as string[]);
               props.selectedObject.onChange(selectOptions?.map(x => _.omit(x, ['children'])) as JSONObject[]);

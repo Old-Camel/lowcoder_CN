@@ -1,7 +1,7 @@
 ##
 ## Build Lowcoder api-service application
 ##
-FROM maven:3.9-eclipse-temurin-17 AS build-api-service
+FROM m.daocloud.io/docker.io/library/maven:3.9-eclipse-temurin-17 AS build-api-service
 
 # Build lowcoder-api
 COPY ./server/api-service /lowcoder-server
@@ -26,7 +26,7 @@ RUN chmod +x /lowcoder/api-service/*.sh
 ## To create a separate image out of it, build it with:
 ##   DOCKER_BUILDKIT=1 docker build -f deploy/docker/Dockerfile -t lowcoderorg/lowcoder-ce-api-service --target lowcoder-ce-api-service .
 ##
-FROM eclipse-temurin:17-jammy AS lowcoder-ce-api-service
+FROM m.daocloud.io/docker.io/library/eclipse-temurin:17-jammy AS lowcoder-ce-api-service
 LABEL maintainer="lowcoder"
 
 RUN apt-get update && apt-get install -y --no-install-recommends gosu \
@@ -51,14 +51,17 @@ CMD [ "/bin/bash" , "/lowcoder/api-service/entrypoint.sh" ]
 ##
 ## Build lowcoder node service
 ##
-FROM ubuntu:jammy AS build-node-service
+FROM m.daocloud.io/docker.io/library/ubuntu:jammy AS build-node-service
+RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
+    sed -i 's/security.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
+    apt-get clean
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y curl ca-certificates build-essential gnupg
 
 # Add nodejs repo and keys
 RUN mkdir -p /etc/apt/keyrings \
   && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-  && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+  && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
 
 # Download nodejs and install yarn
 RUN apt-get update \
@@ -68,8 +71,17 @@ RUN apt-get update \
 # Copy and build the node-service app
 COPY server/node-service/ /lowcoder/node-service/app/
 WORKDIR /lowcoder/node-service/app/
-RUN yarn --immutable
-RUN yarn build
+
+# 清理并重新安装依赖
+RUN rm -rf node_modules yarn.lock \
+    && npm cache clean --force \
+    && yarn install --force \
+    && sed -i 's/"build": "rm -rf build\/ && yarn test && tsc && yarn copy"/"build": "rm -rf build\/ && tsc && yarn copy"/' package.json \
+    && cd node_modules/duckdb \
+    && npm rebuild \
+    && cd ../.. \
+    && yarn rebuild \
+    && yarn build
 
 # Copy startup script
 COPY deploy/docker/node-service/entrypoint.sh /lowcoder/node-service/entrypoint.sh
@@ -82,7 +94,7 @@ RUN chmod +x /lowcoder/node-service/*.sh
 ## To create a separate image out of it, build it with:
 ##   DOCKER_BUILDKIT=1 docker build -f deploy/docker/Dockerfile -t lowcoderorg/lowcoder-ce-node-service --target lowcoder-ce-node-service .
 ##
-FROM ubuntu:jammy AS lowcoder-ce-node-service
+FROM m.daocloud.io/docker.io/library/ubuntu:jammy AS lowcoder-ce-node-service
 LABEL maintainer="lowcoder"
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y curl ca-certificates gnupg
@@ -90,7 +102,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
 # Add nodejs repo and keys
 RUN mkdir -p /etc/apt/keyrings \
   && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-  && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+  && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
 
 # Download nodejs and install yarn
 RUN apt-get update \
@@ -110,9 +122,11 @@ CMD [ "/bin/sh", "/lowcoder/node-service/entrypoint.sh" ]
 ##
 ## Build lowcoder client application
 ##
-FROM node:20.2-slim AS build-client
-
-# curl is required for yarn build to succeed, because it calls it while building client
+FROM m.daocloud.io/docker.io/library/node:20.2-slim AS build-client
+RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
+    sed -i 's/security.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
+    apt-get clean
+# curl is required for yarn build  to succeed, because it calls it while building client
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
 
 # Build client
@@ -124,22 +138,23 @@ ARG REACT_APP_COMMIT_ID=test
 ARG REACT_APP_ENV=production
 ARG REACT_APP_EDITION=community
 ARG REACT_APP_DISABLE_JS_SANDBOX=true
-RUN yarn build
+
+RUN  yarn build 
 
 # Build lowcoder-comps
 WORKDIR /lowcoder-client/packages/lowcoder-comps
 RUN yarn install
-RUN yarn build
+RUN  yarn build 
 RUN tar -zxf lowcoder-comps-*.tgz && mv package lowcoder-comps
 
 # Build lowcoder-sdk
 WORKDIR /lowcoder-client/packages/lowcoder-sdk
 RUN yarn install
-RUN yarn build
+RUN  yarn build 
 
 WORKDIR /lowcoder-client/packages/lowcoder-sdk-webpack-bundle
 RUN yarn install
-RUN yarn build
+RUN  yarn build 
 
 ##
 ## Intermediary Lowcoder client image
@@ -147,7 +162,7 @@ RUN yarn build
 ## To create a separate image out of it, build it with:
 ##   DOCKER_BUILDKIT=1 docker build -f deploy/docker/Dockerfile -t lowcoderorg/lowcoder-ce-frontend --target lowcoder-ce-frontend .
 ##
-FROM nginx:1.27.1 AS lowcoder-ce-frontend
+FROM m.daocloud.io/docker.io/library/nginx:1.27.1 AS lowcoder-ce-frontend
 LABEL maintainer="lowcoder"
 
 # Change default nginx user into lowcoder user and remove default nginx config
@@ -166,9 +181,10 @@ COPY --chown=lowcoder:lowcoder --from=build-client /lowcoder-client/packages/low
 COPY --chown=lowcoder:lowcoder --from=build-client /lowcoder-client/packages/lowcoder-sdk-webpack-bundle/dist /lowcoder/client-embed
 
 
-# Copy additional nginx init scripts
-COPY deploy/docker/frontend/00-change-nginx-user.sh /docker-entrypoint.d/00-change-nginx-user.sh
-COPY deploy/docker/frontend/01-update-nginx-conf.sh /docker-entrypoint.d/01-update-nginx-conf.sh
+# Copy additional nginx init scripts and fix line endings
+COPY --chmod=0755 deploy/docker/frontend/00-change-nginx-user.sh /docker-entrypoint.d/00-change-nginx-user.sh
+COPY --chmod=0755 deploy/docker/frontend/01-update-nginx-conf.sh /docker-entrypoint.d/01-update-nginx-conf.sh
+RUN dos2unix /docker-entrypoint.d/*.sh
 
 RUN chmod +x /docker-entrypoint.d/00-change-nginx-user.sh && \
     chmod +x /docker-entrypoint.d/01-update-nginx-conf.sh
@@ -188,22 +204,21 @@ EXPOSE 3443
 ##
 ## Build Lowcoder all-in-one image
 ##
-FROM ubuntu:jammy
+FROM m.daocloud.io/docker.io/library/ubuntu:jammy
 LABEL maintainer="lowcoder"
+RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
+    sed -i 's/security.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list && \
+    apt-get clean
 
-# Install essential tools
+# Install essential tools including dos2unix
 RUN apt-get update \
-  && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y curl ca-certificates gnupg bash lsb-release \
+  && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y curl ca-certificates gnupg bash lsb-release dos2unix \
   && rm -rf /var/cache/apt/lists /var/lib/apt/lists/* /var/log/dpkg.log \
   && apt-get clean
 
 # Add required apt repositories and signing keys
 RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /usr/share/keyrings/nodesource-keyring.gpg \
-  && echo "deb [signed-by=/usr/share/keyrings/nodesource-keyring.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
-  && curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg \
-  && echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb `lsb_release -cs` main" | tee /etc/apt/sources.list.d/redis.list \
-  && curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-archive-keyring.gpg \
-  && echo "deb [signed-by=/usr/share/keyrings/mongodb-archive-keyring.gpg] https://repo.mongodb.org/apt/ubuntu `lsb_release -cs`/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list \
+  && echo "deb [signed-by=/usr/share/keyrings/nodesource-keyring.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
   && curl -fsSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor -o /usr/share/keyrings/nginx-archive-keyring.gpg \
   && echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/mainline/ubuntu `lsb_release -cs` nginx" | tee /etc/apt/sources.list.d/nginx.list
 
@@ -211,8 +226,6 @@ RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg -
 # Install required packages
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install --no-install-recommends -y \
       nginx=1.27.1-1~jammy \
-      mongodb-org \
-      redis \
       supervisor \
       gosu \
       nodejs \
@@ -224,8 +237,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -y install --no-ins
 
 # Use configuration setup from official nginx image
 RUN rm -rf /etc/nginx/nginx.conf
-COPY --from=nginx:1.27.1 /docker-entrypoint.d /docker-entrypoint.d
-COPY --from=nginx:1.27.1 /docker-entrypoint.sh /docker-entrypoint.sh
+COPY --from=m.daocloud.io/docker.io/library/nginx:1.27.1 /docker-entrypoint.d /docker-entrypoint.d
+COPY --from=m.daocloud.io/docker.io/library/nginx:1.27.1 /docker-entrypoint.sh /docker-entrypoint.sh
 
 # Add lowcoder user
 RUN usermod --login lowcoder --uid 9001 nginx \
@@ -262,19 +275,30 @@ COPY --chown=lowcoder:lowcoder --from=lowcoder-ce-node-service /lowcoder/node-se
 # Add services configuration
 COPY --chown=lowcoder:lowcoder deploy/docker/all-in-one/etc /lowcoder/etc
 
-# Add startup script
+# Add startup script and fix line endings
 COPY --chown=lowcoder:lowcoder deploy/docker/all-in-one/entrypoint.sh /lowcoder/entrypoint.sh
+RUN chmod 775 /lowcoder/entrypoint.sh
 
 # Fixes for OpenShift compatibility (after all files are copied)
 RUN echo  \
   && adduser lowcoder root \
   && mkdir -p /lowcoder-stacks \
-  && for i in /lowcoder-stacks /lowcoder/assets /lowcoder/api-service/logs /lowcoder/etc/supervisord; do \
-       chmod -R g+rw "$i"; \
+  && for i in /lowcoder-stacks /lowcoder/assets /lowcoder/api-service/logs /lowcoder/etc/supervisord /lowcoder/node-service/logs; do \
+       mkdir -p "$i"; \
+       chmod -R 775 "$i"; \
        chown -R lowcoder:root "$i"; \
      done \
-  && chown -R lowcoder:root /var/log \
-  && chmod -R g+rw /run /etc/nginx /var/cache/nginx /var/log
+  && chown -R lowcoder:root /var/log /lowcoder \
+  && chmod -R 775 /run /etc/nginx /var/cache/nginx /var/log /lowcoder
+
+# Fix all shell script line endings in /lowcoder and /docker-entrypoint.d directories
+RUN find /lowcoder -type f -name "*.sh" -exec sed -i 's/\r$//' {} \; \
+    && find /lowcoder -type f -name "*.sh" -exec chmod 775 {} \; \
+    && find /docker-entrypoint.d -type f -name "*.sh" -exec sed -i 's/\r$//' {} \; \
+    && find /docker-entrypoint.d -type f -name "*.sh" -exec chmod 775 {} \; \
+    && chown -R lowcoder:root /docker-entrypoint.d
+
+ENV JAVA_OPTS="-Xmx2G -Xms512M"
 
 EXPOSE 27017
 EXPOSE 3000

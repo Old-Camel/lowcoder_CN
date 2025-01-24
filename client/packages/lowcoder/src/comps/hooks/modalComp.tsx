@@ -124,7 +124,6 @@ let TmpModalComp = (function () {
       toggleClose:withDefault(BoolControl,true),
       showCloseButton: BoolControl.DEFAULT_TRUE,
       defaultStartHeight: withDefault(StringControl, '20%'),
-      title: StringControl,
     },
     (props, dispatch) => {
       const userViewMode = useUserViewMode();

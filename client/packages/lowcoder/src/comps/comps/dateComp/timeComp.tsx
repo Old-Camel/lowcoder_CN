@@ -40,7 +40,7 @@ import {
 } from "comps/utils/propertyUtils";
 import { trans } from "i18n";
 import { TIME_FORMAT, TimeParser } from "util/dateTimeUtils";
-import React, { ReactNode, useState, useContext, useEffect, useState } from "react";
+import React, { ReactNode, useState, useContext, useEffect } from "react";
 import { IconControl } from "comps/controls/iconControl";
 import { hasIcon } from "comps/utils";
 import { Section, sectionNames } from "components/Section";

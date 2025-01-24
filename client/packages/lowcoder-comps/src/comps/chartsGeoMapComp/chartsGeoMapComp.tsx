@@ -33,7 +33,6 @@ import {
   echartsConfigOmitChildren,
   getEchartsConfig,
   getSelectedPoints,
-  loadGoogleMapsScript,
 } from "comps/basicChartComp/chartUtils";
 import 'echarts-extension-gmap';
 import log from "loglevel";
@@ -147,16 +146,11 @@ MapTmpComp = withViewFn(MapTmpComp, (comp) => {
 
   useEffect(() => {
     if(comp.children.mapInstance.value) return;
-
-    const gMapScript = loadGoogleMapsScript(apiKey);
     if(isMapScriptLoaded) {
       handleOnMapScriptLoad();
       return;
     }
-    gMapScript.addEventListener('load', handleOnMapScriptLoad);
-    return () => {
-      gMapScript.removeEventListener('load', handleOnMapScriptLoad);
-    }
+
   }, [apiKey, option])
 
   useEffect(() => {

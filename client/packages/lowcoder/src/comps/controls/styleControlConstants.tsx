@@ -1226,21 +1226,9 @@ export const ColorPickerStyle = [
   ...ACCENT_VALIDATE,
 ] as const;
 
-export const ColorPickerStyle = [
-  LABEL,
-  getStaticBackground(SURFACE_COLOR),
-  ...STYLING_FIELDS_SEQUENCE,
-  ...ACCENT_VALIDATE,
-] as const;
 
-export const AvatarStyle = [
-  {
-    name: "background",
-    label: trans("avatarComp.avatarBackground"),
-    color: "#bfbfbf",
-  },
-  FILL,
-] as const;
+
+
 
 export const avatarContainerStyle = [
   getStaticBackground(SURFACE_COLOR),
@@ -1252,14 +1240,7 @@ export const avatarLabelStyle = [
   ...STYLING_FIELDS_SEQUENCE.filter((style) => style.name !== 'rotation'),
 ] as const;
 
-export const avatarGroupStyle = [
-  {
-    name: "fill",
-    label: trans("style.fill"),
-    color: "#FFFFFF",
-  },
-  getBackground("primary"),
-] as const;
+
 
 export const BadgeStyle = [
   {
@@ -1281,33 +1262,13 @@ export const TransferStyle = [
   ...STYLING_FIELDS_CONTAINER_SEQUENCE.filter(style=>style.name!=='rotation'),
 ] as const;
 
-export const CardStyle = [
-  getStaticBackground("#ffffff"),
-  {
-    name: "IconColor",
-    label: trans("card.IconColor"),
-    color: "#000000",
-  },
-  {
-    name: "activateColor",
-    label: trans("card.hoverColor"),
-    depTheme: "primary",
-    depType: DEP_TYPE.SELF,
-    transformer: toSelf,
-  },
-  CONTAINER_BODY_PADDING,
-  ...STYLING_FIELDS_CONTAINER_SEQUENCE,
-] as const;
 
 export const CardHeaderStyle = [
   getStaticBackground(SURFACE_COLOR),
   ...STYLING_FIELDS_SEQUENCE,
 ] as const;
 
-export const timerStyle = [
-  getBackground("primarySurface"),
-  ...STYLING_FIELDS_SEQUENCE,
-] as const;
+
 
 export const startButtonStyle = [
   getBackground("primarySurface"),
@@ -1919,7 +1880,7 @@ export const AntLayoutFramerStyle = [
   PADDING,
 ] as const;
 
-export const ImageStyle = [getStaticBorder("#00000000"), RADIUS, BORDER_WIDTH, MARGIN, PADDING] as const;
+
 export const ImageStyle = [
   getStaticBorder("#00000000"),
   RADIUS,
@@ -1951,7 +1912,9 @@ export const IconStyle = [
     transformer: toSelf,
   },
   RADIUS,
-  MARGIN
+  MARGIN,
+  PADDING,
+  ROTATION
   ] as const;
 
 
@@ -2055,6 +2018,8 @@ export const CardStyle = [
     transformer: toSelf,
   },
   CONTAINER_BODY_PADDING,
+  ...STYLING_FIELDS_CONTAINER_SEQUENCE,
+
 ] as const;
 
 export const GanttStyle = [
@@ -2180,17 +2145,8 @@ export const GanttStyle = [
   },
 ] as const;
 
-export const TransferStyle = [
-  MARGIN,
-] as const;
 
-export const FloatButtonStyle = [
-  {
-    name: "badgeColor",
-    label: trans("floatButton.badgeColor"),
-    color: "#ff4d4f",
-  },
-] as const;
+
 
 export const AvatarStyle = [
   {
@@ -2497,6 +2453,8 @@ export const timerStyle = [
     label: trans("timer.fontColor"),
     color: "#000000",
   },
+  ...STYLING_FIELDS_SEQUENCE,
+
 ] as const;
 
 export const stepsStyle = [
@@ -2515,21 +2473,15 @@ export const RichTextEditorStyle = [
   BORDER_WIDTH,
 ] as const;
 
-export type QRCodeStyleType = StyleConfigType<typeof QRCodeStyle>;
 export type TimeLineStyleType = StyleConfigType<typeof TimeLineStyle>;
-export type AvatarStyleType = StyleConfigType<typeof AvatarStyle>;
 export type AvatarLabelStyleType = StyleConfigType<typeof avatarLabelStyle>;
 export type AvatarContainerStyleType = StyleConfigType<
   typeof avatarContainerStyle
 >;
 export type AvatarGroupStyleType = StyleConfigType<typeof avatarGroupStyle>;
-export type FloatButtonStyleType = StyleConfigType<typeof FloatButtonStyle>;
 export type DropdownStyleType = StyleConfigType<typeof DropdownStyle>;
 export type BadgeStyleType = StyleConfigType<typeof BadgeStyle>;
-export type TransferStyleType = StyleConfigType<typeof TransferStyle>;
-export type CardStyleType = StyleConfigType<typeof CardStyle>;
 export type CardHeaderStyleType = StyleConfigType<typeof CardHeaderStyle>;
-export type timerStyleType = StyleConfigType<typeof timerStyle>;
 export type StartButtonStyleType = StyleConfigType<typeof startButtonStyle>;
 
 export type LabelStyleType = StyleConfigType<typeof LabelStyle>;
@@ -2538,7 +2490,6 @@ export type InputLikeStyleType = StyleConfigType<typeof InputLikeStyle>;
 export type ColorPickerStyleType = StyleConfigType<typeof ColorPickerStyle>;
 export type InputFieldStyleType = StyleConfigType<typeof InputFieldStyle>;
 export type SignatureContainerStyleType = StyleConfigType<typeof SignatureContainerStyle>;
-export type ColorPickerStyleType = StyleConfigType<typeof ColorPickerStyle>;
 export type ButtonStyleType = StyleConfigType<typeof ButtonStyle>;
 export type ToggleButtonStyleType = StyleConfigType<typeof ToggleButtonStyle>;
 export type TextStyleType = StyleConfigType<typeof TextStyle>;

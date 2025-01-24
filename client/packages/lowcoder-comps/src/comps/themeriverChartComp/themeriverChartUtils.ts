@@ -11,7 +11,7 @@ import _ from "lodash";
 import { chartColorPalette, isNumeric, JSONObject, loadScript } from "lowcoder-sdk";
 import { calcXYConfig } from "comps/chartComp/chartConfigs/cartesianAxisConfig";
 import Big from "big.js";
-import { googleMapsApiUrl } from "../chartComp/chartConfigs/chartUrls";
+
 
 export function transformData(
   originData: JSONObject[],
@@ -324,26 +324,4 @@ export function getSelectedPoints(param: any, option: any) {
   return [];
 }
 
-export function loadGoogleMapsScript(apiKey: string) {
-  const mapsUrl = `${googleMapsApiUrl}?key=${apiKey}`;
-  const scripts = document.getElementsByTagName('script');
-  // is script already loaded
-  let scriptIndex = _.findIndex(scripts, (script) => script.src.endsWith(mapsUrl));
-  if(scriptIndex > -1) {
-    return scripts[scriptIndex];
-  }
-  // is script loaded with diff api_key, remove the script and load again
-  scriptIndex = _.findIndex(scripts, (script) => script.src.startsWith(googleMapsApiUrl));
-  if(scriptIndex > -1) {
-    scripts[scriptIndex].remove();
-  }
 
-  const script = document.createElement("script");
-  script.type = "text/javascript";
-  script.src = mapsUrl;
-  script.async = true;
-  script.defer = true;
-  window.document.body.appendChild(script);
-
-  return script;
-}
