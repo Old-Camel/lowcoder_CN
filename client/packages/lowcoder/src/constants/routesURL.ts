@@ -86,10 +86,10 @@ export const isAuthUnRequired = (pathname: string): boolean => {
 };
 
 export const buildDatasourceCreateUrl = (datasourceType: DatasourceType) =>
-  `${ROOT_PATH}${DATASOURCE_URL}/new/${datasourceType}`;
-export const buildDatasourceEditUrl = (datasourceId: string) => `${ROOT_PATH}${DATASOURCE_URL}/${datasourceId}`;
+  `${DATASOURCE_URL}/new/${datasourceType}`;
+export const buildDatasourceEditUrl = (datasourceId: string) => `${DATASOURCE_URL}/${datasourceId}`;
 
-export const buildFolderUrl = (folderId: string) => `${ROOT_PATH}${FOLDER_URL_PREFIX}/${folderId}`;
+export const buildFolderUrl = (folderId: string) => `${FOLDER_URL_PREFIX}/${folderId}`;
 
 export const buildAppRouteWithState = (
   appId: string,
