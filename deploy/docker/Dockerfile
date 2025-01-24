@@ -137,7 +137,6 @@ WORKDIR /lowcoder-client
 
 # 修改 yarn 配置方式
 RUN  yarn config set npmRegistryServer https://registry.npmmirror.com && \
-    yarn config set networkTimeout 300000 && \
     rm -rf node_modules yarn.lock && \
     yarn install
 
