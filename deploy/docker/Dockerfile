@@ -63,10 +63,10 @@ RUN mkdir -p /etc/apt/keyrings \
   && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
   && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
 
-# Download nodejs and install yarn
+# Download nodejs and install tyarn
 RUN apt-get update \
   && apt-get install --no-install-recommends -y nodejs \
-  && npm install -g yarn
+  && npm install -g tyarn
 
 # Copy and build the node-service app
 COPY server/node-service/ /lowcoder/node-service/app/
@@ -75,14 +75,14 @@ WORKDIR /lowcoder/node-service/app/
 # 清理并重新安装依赖
 RUN rm -rf node_modules yarn.lock \
     && npm cache clean --force \
-    && yarn install \
-    && yarn add @apidevtools/json-schema-ref-parser@9.0.9 @apidevtools/swagger-parser@10.1.0 --exact \
+    && tyarn install \
+    && tyarn add @apidevtools/json-schema-ref-parser@9.0.9 @apidevtools/swagger-parser@10.1.0 --exact \
     && sed -i 's/"build": "rm -rf build\/ && yarn test && tsc && yarn copy"/"build": "rm -rf build\/ && tsc && yarn copy"/' package.json \
     && cd node_modules/duckdb \
     && npm rebuild \
     && cd ../.. \
-    && yarn rebuild \
-    && yarn build
+    && tyarn rebuild \
+    && tyarn build
 
 # Copy startup script
 COPY deploy/docker/node-service/entrypoint.sh /lowcoder/node-service/entrypoint.sh
@@ -105,10 +105,10 @@ RUN mkdir -p /etc/apt/keyrings \
   && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
   && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
 
-# Download nodejs and install yarn
+# Download nodejs and install tyarn
 RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y nodejs gosu \
-  && npm install -g yarn \
+  && npm install -g tyarn \
   && rm -rf /var/cache/apt/lists \
   && addgroup --system --gid 9001 lowcoder \
   && adduser --system --disabled-password --no-create-home --uid 9001 --gid 9001 lowcoder
@@ -136,29 +136,28 @@ COPY ./client /lowcoder-client
 WORKDIR /lowcoder-client
 
 # 修改 yarn 配置方式
-RUN yarn install
-
+RUN tyarn install 
 ARG REACT_APP_COMMIT_ID=test
 ARG REACT_APP_ENV=production
 ARG REACT_APP_EDITION=community
 ARG REACT_APP_DISABLE_JS_SANDBOX=true
 
-RUN yarn build 
+RUN tyarn build 
 
 # Build lowcoder-comps
 WORKDIR /lowcoder-client/packages/lowcoder-comps
-RUN yarn install
-RUN  yarn build 
+RUN tyarn install
+RUN tyarn build 
 RUN tar -zxf lowcoder-comps-*.tgz && mv package lowcoder-comps
 
 # Build lowcoder-sdk
 WORKDIR /lowcoder-client/packages/lowcoder-sdk
-RUN yarn install
-RUN  yarn build 
+RUN tyarn install
+RUN tyarn build 
 
 WORKDIR /lowcoder-client/packages/lowcoder-sdk-webpack-bundle
-RUN yarn install
-RUN  yarn build 
+RUN tyarn install
+RUN tyarn build 
 
 ##
 ## Intermediary Lowcoder client image
